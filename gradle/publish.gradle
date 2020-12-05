@@ -46,9 +46,9 @@ publishing {
             artifact javadocJar {
                 classifier "javadoc"
             }
-            groupId 'io.github.adven27.env'
+            groupId libGroup
             artifactId project.name
-            version project.version
+            version libVersion
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'Java library for a microservice environment emulation')
@@ -63,7 +63,7 @@ publishing {
 apply plugin: 'com.jfrog.bintray'
 bintray {
     user = "adven27"
-    key = System.getenv("bintrayKey")
+    key = bintrayKey
     publications = ['mavenPublication']
 
     pkg {
@@ -73,7 +73,7 @@ bintray {
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/Adven27/env.git'
         version {
-            name = project.version
+            name = libVersion
             desc = "Java library for a microservice environment emulation"
             released = new Date()
         }
