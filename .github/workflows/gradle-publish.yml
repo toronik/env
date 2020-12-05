@@ -1,4 +1,4 @@
-# This workflow will build a package using Gradle and then publish it to bintray packages when a release is created
+# This workflow will build a package using Gradle and then publish it to Bintray packages when a release is created
 name: Gradle Publish
 
 on:
@@ -17,10 +17,10 @@ jobs:
       with:
         java-version: 1.8
 
-    - name: Build with Gradle
+    - name: Build
       run: gradle build
 
-    - name: Publish to GitHub Packages
+    - name: Publish to Bintray
       run: gradle publish
       env:
         bintrayKey: ${{ secrets.BINTRAY_KEY }}
