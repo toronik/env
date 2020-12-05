@@ -72,5 +72,10 @@ bintray {
         userOrg = 'adven27'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/Adven27/env.git'
+        version {
+            name = project.version
+            desc = "Java library for a microservice environment emulation"
+            released = new Date()
+        }
     }
 }
