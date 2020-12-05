@@ -63,7 +63,7 @@ publishing {
 apply plugin: 'com.jfrog.bintray'
 bintray {
     user = "adven27"
-    key = bintrayKey
+    key = System.getenv("bintrayKey")
     publications = ['mavenPublication']
 
     pkg {
