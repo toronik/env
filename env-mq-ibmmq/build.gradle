@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+apply from: "$rootDir/gradle/publish.gradle"
+
+dependencies {
+    api project(':env-container')
+    implementation "org.adven.concordion.ext:exam-mq:$exam_version"
+    implementation 'com.ibm.mq:com.ibm.mq.allclient:9.2.0.1'
+}

@@ -1,0 +1,69 @@
+buildscript {
+    ext.kotlin_version = '1.4.10'
+    ext.testContainers_version = '1.15.0'
+    ext.wiremock_version = '2.25.1'
+    ext.klogging_version = '2.0.3'
+    ext.exam_version = '4.2.0'
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.14.2"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
+    }
+}
+
+group 'io.github.adven27.env'
+version = 'develop-SNAPSHOT'
+
+subprojects {
+    apply plugin: "io.gitlab.arturbosch.detekt"
+    apply plugin: 'kotlin'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    compileJava.options.encoding = 'utf-8'
+    compileTestJava.options.encoding = 'utf-8'
+
+    compileKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ['-Xjsr305=strict']
+            jvmTarget = '1.8'
+        }
+    }
+
+    compileTestKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ['-Xjsr305=strict']
+            jvmTarget = '1.8'
+        }
+    }
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    }
+
+    apply from: "$rootDir/gradle/linters.gradle"
+}
+
+task publish {
+    dependsOn ":env-core:bintrayUpload"
+    dependsOn ":env-container:bintrayUpload"
+    dependsOn ":env-db-db2:bintrayUpload"
+    dependsOn ":env-db-mysql:bintrayUpload"
+    dependsOn ":env-db-postgresql:bintrayUpload"
+    dependsOn ":env-grpc-mock:bintrayUpload"
+    dependsOn ":env-mq-rabbit:bintrayUpload"
+    dependsOn ":env-mq-redis:bintrayUpload"
+    dependsOn ":env-mq-ibmmq:bintrayUpload"
+    dependsOn ":env-wiremock:bintrayUpload"
+}

@@ -1,0 +1,13 @@
+rootProject.name = 'env'
+
+include 'env-core'
+include 'env-wiremock'
+include 'env-container'
+include 'env-db-mysql'
+include 'env-db-postgresql'
+include 'env-db-db2'
+include 'env-mq-rabbit'
+include 'env-mq-redis'
+include 'env-mq-ibmmq'
+include 'env-grpc-mock'
+include 'example'

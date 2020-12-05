@@ -1,0 +1,81 @@
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "Adven27"
+            name "Nikolai Toropanov"
+            email "n.toropanov@gmail.com"
+        }
+    }
+
+    scm {
+        url "https://github.com/Adven27/env"
+    }
+}
+
+apply plugin: 'maven-publish'
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar {
+                classifier "sources"
+            }
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+            groupId 'io.github.adven27.env'
+            artifactId project.name
+            version bintrayVersion
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Java library for a microservice environment emulation')
+                root.appendNode('name', 'env')
+                root.appendNode('url', 'https://github.com/Adven27/env')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+apply plugin: 'com.jfrog.bintray'
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+    publications = ['mavenPublication']
+
+    pkg {
+        repo = 'env'
+        name = project.name
+        userOrg = 'adven27'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/Adven27/env.git'
+        version {
+            name = bintrayVersion
+            desc = bintrayVersion
+            released = new Date()
+        }
+    }
+}
