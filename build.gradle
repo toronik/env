@@ -16,7 +16,7 @@ buildscript {
 }
 
 group 'io.github.adven27.env'
-version = 'develop-SNAPSHOT'
+version = '1.0.0'
 
 subprojects {
     apply plugin: "io.gitlab.arturbosch.detekt"

@@ -48,7 +48,7 @@ publishing {
             }
             groupId 'io.github.adven27.env'
             artifactId project.name
-            version bintrayVersion
+            version project.version
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'Java library for a microservice environment emulation')
@@ -62,8 +62,8 @@ publishing {
 
 apply plugin: 'com.jfrog.bintray'
 bintray {
-    user = bintrayUser
-    key = bintrayKey
+    user = "adven27"
+    key = System.getenv("bintrayKey")
     publications = ['mavenPublication']
 
     pkg {
@@ -72,10 +72,5 @@ bintray {
         userOrg = 'adven27'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/Adven27/env.git'
-        version {
-            name = bintrayVersion
-            desc = bintrayVersion
-            released = new Date()
-        }
     }
 }
