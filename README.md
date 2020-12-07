@@ -1,4 +1,4 @@
-![Github CI](https://github.com/Adven27/env/workflows/Java%20CI%20with%20Gradle/badge.svg)
+![CI](https://github.com/Adven27/env/workflows/CI/badge.svg)
 # env
 Java library for a microservice environment emulation
 
@@ -6,6 +6,10 @@ Java library for a microservice environment emulation
 ### How to use
 1. Add needed dependencies:
 ```groovy
+repositories {
+    jcenter()
+}
+...
 testImplementation "io.github.adven27.env:env-db-postgresql:1.0.0"
 testImplementation "io.github.adven27.env:env-db-mysql:1.0.0"
 testImplementation "io.github.adven27.env:env-db-db2:1.0.0"
