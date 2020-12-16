@@ -10,6 +10,8 @@ import com.ibm.msg.client.wmq.WMQConstants.WMQ_PORT
 import com.ibm.msg.client.wmq.WMQConstants.WMQ_PROVIDER
 import com.ibm.msg.client.wmq.WMQConstants.WMQ_QUEUE_MANAGER
 import mu.KLogging
+import java.util.function.Function
+import javax.jms.Message
 import javax.jms.MessageConsumer
 import javax.jms.MessageProducer
 import javax.jms.Queue
@@ -22,14 +24,22 @@ import javax.jms.TextMessage
  * @see javax.jms.QueueBrowser
  */
 @Suppress("unused")
-open class IbmMQBrowseAndSendTester(config: Config) : IbmMQBrowseOnlyTester(config) {
+open class IbmMQBrowseAndSendTester(
+    config: Config,
+    private val sendConverter: SendConverter = DEFAULT_SEND_CONVERTER,
+    receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
+) : IbmMQBrowseOnlyTester(config, receiveConverter) {
     companion object : KLogging()
 
-    private lateinit var producer: MessageProducer
+    protected lateinit var producer: MessageProducer
 
     override fun send(message: String, headers: Map<String, String>) {
         logger.info("Sending to {}...", config.queue)
-        producer.send(session.createTextMessage(message).apply { jmsCorrelationID = headers["jmsCorrelationID"] })
+        producer.send(
+            sendConverter.apply(MqTester.Message(message, headers) to session).apply {
+                jmsCorrelationID = headers["jmsCorrelationID"]
+            }
+        )
         logger.info("Sent to {}\n{}", config.queue, message)
     }
 
@@ -44,14 +54,22 @@ open class IbmMQBrowseAndSendTester(config: Config) : IbmMQBrowseOnlyTester(conf
  * @see javax.jms.MessageConsumer
  */
 @Suppress("unused")
-open class IbmMQConsumeAndSendTester(config: Config) : IbmMQConsumeOnlyTester(config) {
+open class IbmMQConsumeAndSendTester(
+    config: Config,
+    private val sendConverter: SendConverter = DEFAULT_SEND_CONVERTER,
+    receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
+) : IbmMQConsumeOnlyTester(config, receiveConverter) {
     companion object : KLogging()
 
-    private lateinit var producer: MessageProducer
+    protected lateinit var producer: MessageProducer
 
     override fun send(message: String, headers: Map<String, String>) {
         logger.info("Sending to {}...", config.queue)
-        producer.send(session.createTextMessage(message).apply { jmsCorrelationID = headers["jmsCorrelationID"] })
+        producer.send(
+            sendConverter.apply(MqTester.Message(message, headers) to session).apply {
+                jmsCorrelationID = headers["jmsCorrelationID"]
+            }
+        )
         logger.info("Sent to {}\n{}", config.queue, message)
     }
 
@@ -66,17 +84,20 @@ open class IbmMQConsumeAndSendTester(config: Config) : IbmMQConsumeOnlyTester(co
  * Send does nothing.
  * @see javax.jms.QueueBrowser
  */
-open class IbmMQBrowseOnlyTester(config: Config) : JmsTester(config) {
+open class IbmMQBrowseOnlyTester(
+    config: Config,
+    private val receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
+) : JmsTester(config) {
     companion object : KLogging()
 
-    private lateinit var browser: QueueBrowser
+    protected lateinit var browser: QueueBrowser
 
     override fun receive(): List<MqTester.Message> {
         logger.info("Reading from {}", config.queue)
         val result: MutableList<MqTester.Message> = mutableListOf()
         val messages = browser.enumeration
         while (messages.hasMoreElements()) {
-            result.add(messages.nextElement().let { MqTester.Message((it as TextMessage).text) })
+            result.add(messages.nextElement().let { receiveConverter.apply(it as Message) })
         }
         return result
     }
@@ -92,7 +113,10 @@ open class IbmMQBrowseOnlyTester(config: Config) : JmsTester(config) {
  * Send does nothing.
  * @see javax.jms.MessageConsumer
  */
-open class IbmMQConsumeOnlyTester(config: Config) : JmsTester(config) {
+open class IbmMQConsumeOnlyTester(
+    config: Config,
+    private val receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
+) : JmsTester(config) {
     companion object : KLogging()
 
     override fun receive(): List<MqTester.Message> {
@@ -100,15 +124,13 @@ open class IbmMQConsumeOnlyTester(config: Config) : JmsTester(config) {
         val result: MutableList<MqTester.Message> = mutableListOf()
         while (true) {
             val message = consumer.receiveNoWait() ?: break
-            result.add(message.let { MqTester.Message((it as TextMessage).text) })
+            result.add(message.let { receiveConverter.apply(it) })
         }
         return result
     }
 }
 
 abstract class JmsTester(protected val config: Config) : MqTester.NOOP() {
-    companion object : KLogging()
-
     protected lateinit var session: Session
     protected lateinit var consumer: MessageConsumer
 
@@ -149,4 +171,15 @@ abstract class JmsTester(protected val config: Config) : MqTester.NOOP() {
     }
 
     data class Config(val host: String, val port: Int, val queue: String, val manager: String, val channel: String)
+
+    interface SendConverter : Function<Pair<MqTester.Message, Session>, Message>
+    interface ReceiveConverter : Function<Message, MqTester.Message>
+    companion object : KLogging() {
+        val DEFAULT_SEND_CONVERTER: SendConverter = object : SendConverter {
+            override fun apply(m: Pair<MqTester.Message, Session>): Message = m.second.createTextMessage(m.first.body)
+        }
+        val DEFAULT_RECEIVE_CONVERTER: ReceiveConverter = object : ReceiveConverter {
+            override fun apply(m: Message): MqTester.Message = MqTester.Message((m as TextMessage).text)
+        }
+    }
 }

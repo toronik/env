@@ -11,6 +11,7 @@ import env.core.PortsExposingStrategy.SystemPropertyToggle
 import env.mq.ibmmq.IbmMqConfig.Companion.PROP_CHANNEL
 import env.mq.ibmmq.IbmMqConfig.Companion.PROP_DEV_Q1
 import env.mq.ibmmq.IbmMqConfig.Companion.PROP_DEV_Q2
+import env.mq.ibmmq.IbmMqConfig.Companion.PROP_DEV_Q3
 import env.mq.ibmmq.IbmMqConfig.Companion.PROP_HOST
 import env.mq.ibmmq.IbmMqConfig.Companion.PROP_MANAGER
 import env.mq.ibmmq.IbmMqConfig.Companion.PROP_PORT
@@ -92,6 +93,7 @@ data class RemoteMqWithTemporaryQueues(private val connectionFactory: MQConnecti
                 channel = PROP_CHANNEL set connectionFactory.channel,
                 devQueue1 = PROP_DEV_Q1 set session.tempQueue(),
                 devQueue2 = PROP_DEV_Q2 set session.tempQueue(),
+                devQueue3 = PROP_DEV_Q3 set session.tempQueue(),
             )
         }
     }
@@ -110,12 +112,16 @@ data class IbmMqConfig @JvmOverloads constructor(
     val channel: Prop = PROP_CHANNEL set "DEV.APP.SVRCONN",
     val devQueue1: Prop = PROP_DEV_Q1 set "DEV.QUEUE.1",
     val devQueue2: Prop = PROP_DEV_Q2 set "DEV.QUEUE.2",
+    val devQueue3: Prop = PROP_DEV_Q3 set "DEV.QUEUE.3",
 ) {
     @Suppress("unused")
     val jmsTester1 = jmsConfig(devQueue1.value)
 
     @Suppress("unused")
     val jmsTester2 = jmsConfig(devQueue2.value)
+
+    @Suppress("unused")
+    val jmsTester3 = jmsConfig(devQueue3.value)
 
     private fun jmsConfig(q: String) = JmsTester.Config(host.value, port.value.toInt(), q, manager.value, channel.value)
 
@@ -143,5 +149,6 @@ data class IbmMqConfig @JvmOverloads constructor(
         const val PROP_CHANNEL = "env.mq.ibm.channel"
         const val PROP_DEV_Q1 = "env.mq.ibm.devQueue1"
         const val PROP_DEV_Q2 = "env.mq.ibm.devQueue2"
+        const val PROP_DEV_Q3 = "env.mq.ibm.devQueue3"
     }
 }
