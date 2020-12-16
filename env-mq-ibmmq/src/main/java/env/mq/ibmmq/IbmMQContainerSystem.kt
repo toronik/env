@@ -138,7 +138,7 @@ data class IbmMqConfig @JvmOverloads constructor(
     )
 
     init {
-        mapOf(host.pair(), port.pair(), manager.pair(), channel.pair(), devQueue1.pair(), devQueue2.pair())
+        mapOf(host.pair(), port.pair(), manager.pair(), channel.pair(), devQueue1.pair(), devQueue2.pair(), devQueue3.pair())
             .setProperties()
     }
 

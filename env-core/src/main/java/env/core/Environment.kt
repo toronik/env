@@ -19,6 +19,8 @@ open class Environment(val config: Config, val systems: Map<String, ExternalSyst
         configResolver: ConfigResolver = FromSystemProperty()
     ) : this(configResolver.resolve(), systems)
 
+    constructor(vararg systems: Pair<String, ExternalSystem>) : this(systems.toMap())
+
     init {
         logger.info("Environment settings:\nSystems: $systems\nConfig: $config")
     }

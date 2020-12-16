@@ -50,17 +50,15 @@ class EnvTest {
 }
 
 class SomeEnvironment : Environment(
-    mapOf(
-        "RABBIT" to RabbitContainerSystem(),
-        "IBMMQ" to IbmMQContainerSystem(),
-        "REDIS" to RedisContainerSystem(),
-        "POSTGRES" to PostgreSqlContainerSystem(),
-        "MYSQL" to MySqlContainerSystem(),
-        "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
-            withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
-        },
-        "WIREMOCK" to WiremockSystem()
-    )
+    "RABBIT" to RabbitContainerSystem(),
+    "IBMMQ" to IbmMQContainerSystem(),
+    "REDIS" to RedisContainerSystem(),
+    "POSTGRES" to PostgreSqlContainerSystem(),
+    "MYSQL" to MySqlContainerSystem(),
+    "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
+        withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
+    },
+    "WIREMOCK" to WiremockSystem()
 ) {
     fun rabbit() = find<RabbitContainerSystem>("RABBIT")
     fun postgres() = systems["POSTGRES"] as PostgreSqlContainerSystem
