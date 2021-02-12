@@ -4,6 +4,7 @@ import env.db.mysql.MySqlContainerSystem
 import env.db.postgresql.PostgreSqlContainerSystem
 import env.grpc.GrpcMockContainerSystem
 import env.mq.ibmmq.IbmMQContainerSystem
+import env.mq.kafka.KafkaContainerSystem
 import env.mq.rabbit.RabbitContainerSystem
 import env.mq.redis.RedisContainerSystem
 import env.wiremock.WiremockSystem
@@ -50,6 +51,7 @@ class EnvTest {
 }
 
 class SomeEnvironment : Environment(
+    "KAFKA" to KafkaContainerSystem(),
     "RABBIT" to RabbitContainerSystem(),
     "IBMMQ" to IbmMQContainerSystem(),
     "REDIS" to RedisContainerSystem(),
