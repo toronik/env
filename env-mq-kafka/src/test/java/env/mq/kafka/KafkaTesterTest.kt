@@ -2,9 +2,8 @@ package env.mq.kafka
 
 import env.core.Environment
 import org.junit.AfterClass
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 
 class KafkaTesterTest {
     companion object {
