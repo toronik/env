@@ -9,7 +9,10 @@ import env.core.GenericExternalSystem
 import env.core.PortsExposingStrategy
 import env.core.PortsExposingStrategy.SystemPropertyToggle
 
-class WiremockSystem(val server: WireMockServer, afterStart: WireMockServer.() -> Unit = { }) :
+class WiremockSystem @JvmOverloads constructor(
+    val server: WireMockServer,
+    afterStart: WireMockServer.() -> Unit = { }
+) :
     GenericExternalSystem<WireMockServer>(
         system = server,
         start = { it.start(); it.afterStart() },

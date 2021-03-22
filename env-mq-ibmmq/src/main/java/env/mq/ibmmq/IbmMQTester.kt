@@ -24,9 +24,9 @@ import javax.jms.TextMessage
  * @see javax.jms.QueueBrowser
  */
 @Suppress("unused")
-open class IbmMQBrowseAndSendTester(
+open class IbmMQBrowseAndSendTester @JvmOverloads constructor(
     config: Config,
-    private val sendConverter: SendConverter = DEFAULT_SEND_CONVERTER,
+    private val sendConverter: JmsTester.SendConverter = DEFAULT_SEND_CONVERTER,
     receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
 ) : IbmMQBrowseOnlyTester(config, receiveConverter) {
     companion object : KLogging()
@@ -54,7 +54,7 @@ open class IbmMQBrowseAndSendTester(
  * @see javax.jms.MessageConsumer
  */
 @Suppress("unused")
-open class IbmMQConsumeAndSendTester(
+open class IbmMQConsumeAndSendTester @JvmOverloads constructor(
     config: Config,
     private val sendConverter: SendConverter = DEFAULT_SEND_CONVERTER,
     receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
@@ -84,7 +84,7 @@ open class IbmMQConsumeAndSendTester(
  * Send does nothing.
  * @see javax.jms.QueueBrowser
  */
-open class IbmMQBrowseOnlyTester(
+open class IbmMQBrowseOnlyTester @JvmOverloads constructor(
     config: Config,
     private val receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
 ) : JmsTester(config) {
@@ -113,7 +113,7 @@ open class IbmMQBrowseOnlyTester(
  * Send does nothing.
  * @see javax.jms.MessageConsumer
  */
-open class IbmMQConsumeOnlyTester(
+open class IbmMQConsumeOnlyTester @JvmOverloads constructor(
     config: Config,
     private val receiveConverter: ReceiveConverter = DEFAULT_RECEIVE_CONVERTER
 ) : JmsTester(config) {
@@ -175,9 +175,11 @@ abstract class JmsTester(protected val config: Config) : MqTester.NOOP() {
     interface SendConverter : Function<Pair<MqTester.Message, Session>, Message>
     interface ReceiveConverter : Function<Message, MqTester.Message>
     companion object : KLogging() {
+        @JvmField
         val DEFAULT_SEND_CONVERTER: SendConverter = object : SendConverter {
             override fun apply(m: Pair<MqTester.Message, Session>): Message = m.second.createTextMessage(m.first.body)
         }
+        @JvmField
         val DEFAULT_RECEIVE_CONVERTER: ReceiveConverter = object : ReceiveConverter {
             override fun apply(m: Message): MqTester.Message = MqTester.Message((m as TextMessage).text)
         }
