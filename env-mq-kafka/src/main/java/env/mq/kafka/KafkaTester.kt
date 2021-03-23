@@ -20,6 +20,7 @@ open class KafkaTester @JvmOverloads constructor(
     private val topic: String,
     private val properties: Properties = DEFAULT_PROPERTIES,
     private val pollTimeout: Duration = ofMillis(POLL_MILLIS),
+    private val partitionHeader: String = "partition"
 ) : MqTester {
     protected lateinit var producer: KafkaProducer<Long, String>
     protected lateinit var consumer: KafkaConsumer<Long, String>
@@ -34,16 +35,17 @@ open class KafkaTester @JvmOverloads constructor(
     }
 
     override fun send(message: String, headers: Map<String, String>) = logger.info("Sending to {}...", topic).also {
-        producer.send(ProducerRecord(topic, message)).get().apply {
+        producer.send(record(message, partitionFrom(headers))).get().apply {
             logger.info(
-                "Sent to topic {} and partition {} with offset {}:\n{}",
-                topic(),
-                partition(),
-                offset(),
-                message
+                "Sent to topic {} and partition {} with offset {}:\n{}", topic(), partition(), offset(), message
             )
         }
     }
+
+    private fun partitionFrom(headers: Map<String, String>) = headers[partitionHeader]?.toInt()
+
+    private fun record(value: String, partition: Int?): ProducerRecord<Long, String> =
+        ProducerRecord(topic, partition, null, value)
 
     override fun start() {
         properties[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers

@@ -7,6 +7,9 @@ import env.core.ExternalSystem
 import env.core.PortsExposingStrategy
 import env.core.PortsExposingStrategy.SystemPropertyToggle
 import mu.KLogging
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG
+import org.apache.kafka.clients.admin.NewTopic
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 
@@ -15,8 +18,13 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
     fixedPort: Int = KAFKA_PORT,
     private var config: Config = Config(),
+    private val topicNameAndPartitionCount: Map<String, Int> = mapOf(),
     private val afterStart: KafkaContainerSystem.() -> Unit = { }
 ) : KafkaContainer(dockerImageName), ExternalSystem {
+
+    @JvmOverloads
+    constructor(topicsAndPartitionCount: Map<String, Int>, afterStart: KafkaContainerSystem.() -> Unit = { }) :
+        this(topicNameAndPartitionCount = topicsAndPartitionCount, afterStart = afterStart)
 
     init {
         if (portsExposingStrategy.fixedPorts()) {
@@ -27,6 +35,7 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     override fun start() {
         super.start()
         config = Config(config.bootstrapServers.name set bootstrapServers.toString())
+        createTopics(topicNameAndPartitionCount)
         apply(afterStart)
     }
 
@@ -34,6 +43,13 @@ open class KafkaContainerSystem @JvmOverloads constructor(
 
     @Suppress("unused")
     fun config(): Config = config
+
+    private fun createTopics(topicNameAndPartitionCount: Map<String, Int>) =
+        AdminClient.create(mapOf(BOOTSTRAP_SERVERS_CONFIG to config.bootstrapServers.value)).use { admin ->
+            admin.createTopics(
+                topicNameAndPartitionCount.map { topic -> NewTopic(topic.key, topic.value, 1.toShort()) }
+            )
+        }
 
     data class Config(val bootstrapServers: Prop = PROP_BOOTSTRAPSERVERS set "PLAINTEXT://localhost:$KAFKA_PORT") {
         init {
