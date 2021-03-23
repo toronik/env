@@ -1,5 +1,6 @@
 package env.mq.rabbit
 
+import env.container.parseImage
 import env.core.Environment.Companion.setProperties
 import env.core.Environment.Prop
 import env.core.Environment.Prop.Companion.set
@@ -11,13 +12,17 @@ import org.testcontainers.containers.RabbitMQContainer
 import org.testcontainers.utility.DockerImageName
 
 open class RabbitContainerSystem @JvmOverloads constructor(
-    dockerImageName: DockerImageName = DockerImageName.parse("rabbitmq:3.7.25-management-alpine"),
+    dockerImageName: DockerImageName = DEFAULT_IMAGE,
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
     fixedPort: Int = PORT,
     fixedPortAdm: Int = PORT_ADM,
     private var config: Config = Config(),
     private val afterStart: RabbitContainerSystem.() -> Unit = { }
 ) : RabbitMQContainer(dockerImageName), ExternalSystem {
+
+    @JvmOverloads
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RabbitContainerSystem.() -> Unit)
+        : this(dockerImageName = imageName, afterStart = afterStart)
 
     init {
         if (portsExposingStrategy.fixedPorts()) {
@@ -51,5 +56,8 @@ open class RabbitContainerSystem @JvmOverloads constructor(
         private const val PORT_ADM = 15672
         const val PROP_HOST = "env.mq.rabbit.host"
         const val PROP_PORT = "env.mq.rabbit.port"
+
+        @JvmField
+        val DEFAULT_IMAGE: DockerImageName = "rabbitmq:3.7.25-management-alpine".parseImage()
     }
 }

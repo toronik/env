@@ -2,6 +2,7 @@ package env.mq.ibmmq
 
 import com.ibm.mq.jms.MQConnectionFactory
 import com.ibm.msg.client.wmq.WMQConstants.WMQ_CM_CLIENT
+import env.container.parseImage
 import env.core.Environment.Companion.setProperties
 import env.core.Environment.Prop
 import env.core.Environment.Prop.Companion.set
@@ -26,13 +27,17 @@ import javax.jms.Session.AUTO_ACKNOWLEDGE
 
 @Suppress("unused", "MagicNumber")
 class IbmMQContainerSystem @JvmOverloads constructor(
-    dockerImageName: DockerImageName = DockerImageName.parse(IMAGE),
+    dockerImageName: DockerImageName = DEFAULT_IMAGE,
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
     fixedPort: Int = PORT,
     fixedPortAdm: Int = PORT_ADM,
     private var config: IbmMqConfig = IbmMqConfig(),
     private val afterStart: IbmMQContainerSystem.() -> Unit = { },
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
+
+    @JvmOverloads
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: IbmMQContainerSystem.() -> Unit)
+        : this(dockerImageName = imageName, afterStart = afterStart)
 
     init {
         withEnv("MQ_QMGR_NAME", "QM1")
@@ -61,7 +66,9 @@ class IbmMQContainerSystem @JvmOverloads constructor(
     companion object : KLogging() {
         private const val PORT = 1414
         private const val PORT_ADM = 9443
-        private const val IMAGE = "ibmcom/mq:latest"
+
+        @JvmField
+        val DEFAULT_IMAGE = "ibmcom/mq:latest".parseImage()
     }
 }
 

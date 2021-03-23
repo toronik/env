@@ -1,5 +1,6 @@
 package env.db.mysql
 
+import env.container.parseImage
 import env.core.Environment.Companion.setProperties
 import env.core.Environment.Prop
 import env.core.Environment.Prop.Companion.set
@@ -12,12 +13,16 @@ import org.testcontainers.utility.DockerImageName
 
 @Suppress("LongParameterList")
 class MySqlContainerSystem @JvmOverloads constructor(
-    dockerImageName: DockerImageName = DockerImageName.parse("mysql:5.7.22"),
+    dockerImageName: DockerImageName = DEFAULT_IMAGE,
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
     fixedPort: Int = MYSQL_PORT,
     private var config: Config = Config(),
     private val afterStart: MySqlContainerSystem.() -> Unit = { }
 ) : MySQLContainer<Nothing>(dockerImageName), ExternalSystem {
+
+    @JvmOverloads
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MySqlContainerSystem.() -> Unit)
+        : this(dockerImageName = imageName, afterStart = afterStart)
 
     init {
         if (portsExposingStrategy.fixedPorts()) {
@@ -64,5 +69,8 @@ class MySqlContainerSystem @JvmOverloads constructor(
         const val PROP_USER = "env.db.mysql.username"
         const val PROP_PASSWORD = "env.db.mysql.password"
         const val PROP_DRIVER = "env.db.mysql.driver"
+
+        @JvmField
+        val DEFAULT_IMAGE = "mysql:5.7.22".parseImage()
     }
 }

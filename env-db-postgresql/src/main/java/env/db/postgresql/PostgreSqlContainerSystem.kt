@@ -13,12 +13,16 @@ import org.testcontainers.utility.DockerImageName
 
 @Suppress("LongParameterList")
 class PostgreSqlContainerSystem @JvmOverloads constructor(
-    dockerImageName: DockerImageName = "postgres:9.6.12".parseImage(),
+    dockerImageName: DockerImageName = DEFAULT_IMAGE,
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
     fixedPort: Int = POSTGRESQL_PORT,
     private var config: Config = Config(),
     private val afterStart: PostgreSqlContainerSystem.() -> Unit = { }
 ) : PostgreSQLContainer<Nothing>(dockerImageName), ExternalSystem {
+
+    @JvmOverloads
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: PostgreSqlContainerSystem.() -> Unit)
+        : this(dockerImageName = imageName, afterStart = afterStart)
 
     init {
         if (portsExposingStrategy.fixedPorts()) {
@@ -65,5 +69,8 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
         const val PROP_USER = "env.db.postgresql.username"
         const val PROP_PASSWORD = "env.db.postgresql.password"
         const val PROP_DRIVER = "env.db.postgresql.driver"
+
+        @JvmField
+        val DEFAULT_IMAGE= "postgres:9.6.12".parseImage()
     }
 }

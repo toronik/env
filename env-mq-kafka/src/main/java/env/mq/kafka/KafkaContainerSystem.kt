@@ -1,5 +1,6 @@
 package env.mq.kafka
 
+import env.container.parseImage
 import env.core.Environment.Companion.setProperties
 import env.core.Environment.Prop
 import env.core.Environment.Prop.Companion.set
@@ -14,7 +15,7 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 
 open class KafkaContainerSystem @JvmOverloads constructor(
-    dockerImageName: DockerImageName = DockerImageName.parse("confluentinc/cp-kafka").withTag("5.4.3"),
+    dockerImageName: DockerImageName = DEFAULT_IMAGE,
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
     fixedPort: Int = KAFKA_PORT,
     private var config: Config = Config(),
@@ -23,8 +24,23 @@ open class KafkaContainerSystem @JvmOverloads constructor(
 ) : KafkaContainer(dockerImageName), ExternalSystem {
 
     @JvmOverloads
-    constructor(topicsAndPartitionCount: Map<String, Int>, afterStart: KafkaContainerSystem.() -> Unit = { }) :
-        this(topicNameAndPartitionCount = topicsAndPartitionCount, afterStart = afterStart)
+    constructor(
+        dockerImageName: DockerImageName,
+        topicsAndPartitionCount: Map<String, Int>,
+        afterStart: KafkaContainerSystem.() -> Unit = { }
+    ) : this(
+        dockerImageName = dockerImageName,
+        topicNameAndPartitionCount = topicsAndPartitionCount,
+        afterStart = afterStart
+    )
+
+    @JvmOverloads
+    constructor(topicsAndPartitionCount: Map<String, Int>, afterStart: KafkaContainerSystem.() -> Unit = { })
+        : this(topicNameAndPartitionCount = topicsAndPartitionCount, afterStart = afterStart)
+
+    @JvmOverloads
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: KafkaContainerSystem.() -> Unit)
+        : this(dockerImageName = imageName, afterStart = afterStart)
 
     init {
         if (portsExposingStrategy.fixedPorts()) {
@@ -59,5 +75,8 @@ open class KafkaContainerSystem @JvmOverloads constructor(
 
     companion object : KLogging() {
         const val PROP_BOOTSTRAPSERVERS = "env.mq.kafka.bootstrapServers"
+
+        @JvmField
+        val DEFAULT_IMAGE: DockerImageName = "confluentinc/cp-kafka".parseImage().withTag("5.4.3")
     }
 }

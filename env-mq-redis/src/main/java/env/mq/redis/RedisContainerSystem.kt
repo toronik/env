@@ -1,6 +1,7 @@
 package env.mq.redis
 
 import com.adven.concordion.extensions.exam.mq.MqTester.NOOP
+import env.container.parseImage
 import env.core.Environment.Companion.setProperties
 import env.core.Environment.Prop
 import env.core.Environment.Prop.Companion.set
@@ -14,13 +15,17 @@ import redis.clients.jedis.Jedis
 import java.time.Duration.ofSeconds
 
 class RedisContainerSystem @JvmOverloads constructor(
-    dockerImageName: DockerImageName = DockerImageName.parse(IMAGE),
+    dockerImageName: DockerImageName = DEFAULT_IMAGE,
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
     fixedPort: Int = PORT,
     private var config: Config = Config(),
     private val afterStart: RedisContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
     private val fixedPort: Int
+
+    @JvmOverloads
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RedisContainerSystem.() -> Unit)
+        : this(dockerImageName = imageName, afterStart = afterStart)
 
     init {
         withExposedPorts(PORT)
@@ -69,8 +74,10 @@ class RedisContainerSystem @JvmOverloads constructor(
 
     companion object : KLogging() {
         private const val PORT = 6379
-        private const val IMAGE = "redis:5.0.3-alpine"
         private const val STARTUP_TIMEOUT = 30L
+
+        @JvmField
+        val DEFAULT_IMAGE = "redis:5.0.3-alpine".parseImage()
     }
 
     override fun running() = isRunning
