@@ -36,8 +36,10 @@ class IbmMQContainerSystem @JvmOverloads constructor(
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
 
     @JvmOverloads
-    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: IbmMQContainerSystem.() -> Unit)
-        : this(dockerImageName = imageName, afterStart = afterStart)
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: IbmMQContainerSystem.() -> Unit) : this(
+        dockerImageName = imageName,
+        afterStart = afterStart
+    )
 
     init {
         withEnv("MQ_QMGR_NAME", "QM1")
@@ -145,7 +147,15 @@ data class IbmMqConfig @JvmOverloads constructor(
     )
 
     init {
-        mapOf(host.pair(), port.pair(), manager.pair(), channel.pair(), devQueue1.pair(), devQueue2.pair(), devQueue3.pair())
+        mapOf(
+            host.pair(),
+            port.pair(),
+            manager.pair(),
+            channel.pair(),
+            devQueue1.pair(),
+            devQueue2.pair(),
+            devQueue3.pair()
+        )
             .setProperties()
     }
 

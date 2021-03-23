@@ -35,12 +35,16 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     )
 
     @JvmOverloads
-    constructor(topicsAndPartitionCount: Map<String, Int>, afterStart: KafkaContainerSystem.() -> Unit = { })
-        : this(topicNameAndPartitionCount = topicsAndPartitionCount, afterStart = afterStart)
+    constructor(topicsAndPartitionCount: Map<String, Int>, afterStart: KafkaContainerSystem.() -> Unit = { }) : this(
+        topicNameAndPartitionCount = topicsAndPartitionCount,
+        afterStart = afterStart
+    )
 
     @JvmOverloads
-    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: KafkaContainerSystem.() -> Unit)
-        : this(dockerImageName = imageName, afterStart = afterStart)
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: KafkaContainerSystem.() -> Unit) : this(
+        dockerImageName = imageName,
+        afterStart = afterStart
+    )
 
     init {
         if (portsExposingStrategy.fixedPorts()) {

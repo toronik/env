@@ -21,8 +21,10 @@ class MySqlContainerSystem @JvmOverloads constructor(
 ) : MySQLContainer<Nothing>(dockerImageName), ExternalSystem {
 
     @JvmOverloads
-    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MySqlContainerSystem.() -> Unit)
-        : this(dockerImageName = imageName, afterStart = afterStart)
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MySqlContainerSystem.() -> Unit) : this(
+        dockerImageName = imageName,
+        afterStart = afterStart
+    )
 
     init {
         if (portsExposingStrategy.fixedPorts()) {

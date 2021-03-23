@@ -21,8 +21,10 @@ open class RabbitContainerSystem @JvmOverloads constructor(
 ) : RabbitMQContainer(dockerImageName), ExternalSystem {
 
     @JvmOverloads
-    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RabbitContainerSystem.() -> Unit)
-        : this(dockerImageName = imageName, afterStart = afterStart)
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RabbitContainerSystem.() -> Unit) : this(
+        dockerImageName = imageName,
+        afterStart = afterStart
+    )
 
     init {
         if (portsExposingStrategy.fixedPorts()) {

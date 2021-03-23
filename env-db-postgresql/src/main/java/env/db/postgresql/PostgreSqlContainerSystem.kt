@@ -21,8 +21,10 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
 ) : PostgreSQLContainer<Nothing>(dockerImageName), ExternalSystem {
 
     @JvmOverloads
-    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: PostgreSqlContainerSystem.() -> Unit)
-        : this(dockerImageName = imageName, afterStart = afterStart)
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: PostgreSqlContainerSystem.() -> Unit) : this(
+        dockerImageName = imageName,
+        afterStart = afterStart
+    )
 
     init {
         if (portsExposingStrategy.fixedPorts()) {
@@ -71,6 +73,6 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
         const val PROP_DRIVER = "env.db.postgresql.driver"
 
         @JvmField
-        val DEFAULT_IMAGE= "postgres:9.6.12".parseImage()
+        val DEFAULT_IMAGE = "postgres:9.6.12".parseImage()
     }
 }
