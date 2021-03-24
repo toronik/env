@@ -13,6 +13,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import java.time.Duration
 import java.time.Duration.ofMillis
+import java.time.Duration.ofSeconds
 import java.util.Properties
 
 open class KafkaTester @JvmOverloads constructor(
@@ -55,8 +56,8 @@ open class KafkaTester @JvmOverloads constructor(
     }
 
     override fun stop() {
-        producer.close()
-        consumer.close()
+        producer.close(ofSeconds(4))
+        consumer.close(ofSeconds(4))
     }
 
     companion object : KLogging() {

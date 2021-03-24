@@ -107,7 +107,7 @@ open class RabbitTester @JvmOverloads constructor(
 
     override fun stop() {
         try {
-            connection.close()
+            connection.close(4000)
         } catch (ignored: AlreadyClosedException) {
         }
     }
