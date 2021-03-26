@@ -17,11 +17,11 @@ import java.time.Duration.ofSeconds
 import java.util.Properties
 
 open class KafkaTester @JvmOverloads constructor(
-    private val bootstrapServers: String,
-    private val topic: String,
-    private val properties: Properties = DEFAULT_PROPERTIES,
-    private val pollTimeout: Duration = ofMillis(POLL_MILLIS),
-    private val partitionHeader: String = "partition"
+    protected val bootstrapServers: String,
+    protected val topic: String,
+    protected val properties: Properties = DEFAULT_PROPERTIES,
+    protected val pollTimeout: Duration = ofMillis(POLL_MILLIS),
+    protected val partitionHeader: String = "partition"
 ) : MqTester {
     protected lateinit var producer: KafkaProducer<Long, String>
     protected lateinit var consumer: KafkaConsumer<Long, String>
@@ -61,11 +61,13 @@ open class KafkaTester @JvmOverloads constructor(
     }
 
     companion object : KLogging() {
+
+        @JvmField
         val DEFAULT_PROPERTIES = Properties().apply {
-            put(ProducerConfig.CLIENT_ID_CONFIG, "specs")
+            put(ProducerConfig.CLIENT_ID_CONFIG, "kafka-tester")
             put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer::class.java.name)
             put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java.name)
-            put(ConsumerConfig.GROUP_ID_CONFIG, "specs")
+            put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-tester")
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer::class.java.name)
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java.name)
             put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
