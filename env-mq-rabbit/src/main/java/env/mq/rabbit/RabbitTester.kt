@@ -105,6 +105,7 @@ open class RabbitTester @JvmOverloads constructor(
         purge()
     }
 
+    @Suppress("MagicNumber")
     override fun stop() {
         try {
             connection.close(4000)
