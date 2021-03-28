@@ -93,26 +93,6 @@ open class KafkaMultiPartitionTester @JvmOverloads constructor(
 ) : KafkaTester(bootstrapServers, topic, properties, pollTimeout, partitionHeader) {
     private var adminClient: AdminClient? = null
 
-    override fun receive(): List<MqTester.Message> = consumeStartingFrom(sutOffsets())
-
-    private fun consumeStartingFrom(offsets: Map<TopicPartition, OffsetAndMetadata>): List<MqTester.Message> =
-        if (offsets.isEmpty()) {
-            with(consumer) { seekToBeginning(); consume() }
-        } else {
-            offsets.entries.map { it.key to it.value.offset() }.fold(mutableListOf()) { r, (partition, committed) ->
-                val end = endOf(partition)
-                logger.info("Committed offset: {}", "$committed/$end")
-                if (committed != end) r += with(consumer) { seekTo(committed, partition); consume() }
-                r
-            }
-        }
-
-    private fun sutOffsets(): Map<TopicPartition, OffsetAndMetadata> =
-        adminClient!!.listConsumerGroupOffsets(sutConsumerGroup).partitionsToOffsetAndMetadata()[10, TimeUnit.SECONDS]
-
-    private fun endOf(p: TopicPartition): Long =
-        adminClient!!.listOffsets(mapOf(p to OffsetSpec.latest())).all().get()[p]?.offset() ?: 0L
-
     override fun start() {
         super.start()
         adminClient = AdminClient.create(properties)
@@ -120,17 +100,37 @@ open class KafkaMultiPartitionTester @JvmOverloads constructor(
 
     override fun accumulateOnRetries() = false
 
+    override fun receive(): List<MqTester.Message> = consumer.apply { seekTo(sutOffsets()) }.consume()
+
+    private fun sutOffsets(): Map<TopicPartition, OffsetAndMetadata> =
+        adminClient!!.listConsumerGroupOffsets(sutConsumerGroup)
+            .partitionsToOffsetAndMetadata()[FETCH_CONSUMER_GROUP_OFFSETS_TIMEOUT, TimeUnit.SECONDS]
+            .apply { logger.info("SUT offsets: {}", this) }
+
+    private fun KafkaConsumer<Long, String>.seekTo(offsets: Map<TopicPartition, OffsetAndMetadata>) {
+        if (offsets.isEmpty()) {
+            seekToBeginning()
+        } else {
+            offsets.entries.map { it.key to it.value.offset() }.forEach { (partition, committed) ->
+                val end = endOf(partition)
+                logger.info("Committed offset: {} {}", "$committed/$end", partition)
+                if (committed != end) seekTo(committed, partition)
+            }
+        }
+    }
+
+    private fun endOf(p: TopicPartition): Long =
+        adminClient!!.listOffsets(mapOf(p to OffsetSpec.latest())).all().get()[p]?.offset() ?: 0L
+
     private fun KafkaConsumer<Long, String>.seekToBeginning() {
-        // At this point, there is no heartbeat from consumer and seek() wont work... So call poll()
+        // At this point, there is no heartbeat from consumer and seek() wont work... So call poll() first
         poll(pollTimeout)
-        // Now there is a heartbeat and consumer is "alive"
         seekToBeginning(assignment())
     }
 
     private fun KafkaConsumer<Long, String>.seekTo(pointer: Long, p: TopicPartition) {
-        // At this point, there is no heartbeat from consumer and seek() wont work... So call poll()
+        // At this point, there is no heartbeat from consumer and seek() wont work... So call poll() first
         poll(pollTimeout)
-        // Now there is a heartbeat and consumer is "alive"
         seek(p, pointer)
     }
 
@@ -140,5 +140,6 @@ open class KafkaMultiPartitionTester @JvmOverloads constructor(
 
     companion object : KLogging() {
         private const val POLL_MILLIS: Long = 1500
+        private const val FETCH_CONSUMER_GROUP_OFFSETS_TIMEOUT: Long = 10
     }
 }
