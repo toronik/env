@@ -2,11 +2,15 @@ package env.mq.kafka
 
 import com.adven.concordion.extensions.exam.mq.MqTester
 import mu.KLogging
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.OffsetSpec
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.LongDeserializer
 import org.apache.kafka.common.serialization.LongSerializer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -15,6 +19,7 @@ import java.time.Duration
 import java.time.Duration.ofMillis
 import java.time.Duration.ofSeconds
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 open class KafkaTester @JvmOverloads constructor(
     protected val bootstrapServers: String,
@@ -73,6 +78,67 @@ open class KafkaTester @JvmOverloads constructor(
             put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
             put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
         }
+
+        protected const val POLL_MILLIS: Long = 1500
+    }
+}
+
+open class KafkaMultiPartitionTester @JvmOverloads constructor(
+    private val sutConsumerGroup: String,
+    bootstrapServers: String,
+    topic: String,
+    properties: Properties = DEFAULT_PROPERTIES,
+    pollTimeout: Duration = ofMillis(POLL_MILLIS),
+    partitionHeader: String = "partition"
+) : KafkaTester(bootstrapServers, topic, properties, pollTimeout, partitionHeader) {
+    private var adminClient: AdminClient? = null
+
+    override fun receive(): List<MqTester.Message> = consumeStartingFrom(sutOffsets())
+
+    private fun consumeStartingFrom(offsets: Map<TopicPartition, OffsetAndMetadata>): List<MqTester.Message> =
+        if (offsets.isEmpty()) {
+            with(consumer) { seekToBeginning(); consume() }
+        } else {
+            offsets.entries.map { it.key to it.value.offset() }.fold(mutableListOf()) { r, (partition, committed) ->
+                val end = endOf(partition)
+                logger.info("Committed offset: {}", "$committed/$end")
+                if (committed != end) r += with(consumer) { seekTo(committed, partition); consume() }
+                r
+            }
+        }
+
+    private fun sutOffsets(): Map<TopicPartition, OffsetAndMetadata> =
+        adminClient!!.listConsumerGroupOffsets(sutConsumerGroup).partitionsToOffsetAndMetadata()[10, TimeUnit.SECONDS]
+
+    private fun endOf(p: TopicPartition): Long =
+        adminClient!!.listOffsets(mapOf(p to OffsetSpec.latest())).all().get()[p]?.offset() ?: 0L
+
+    override fun start() {
+        super.start()
+        adminClient = AdminClient.create(properties)
+    }
+
+    override fun accumulateOnRetries() = false
+
+    private fun KafkaConsumer<Long, String>.seekToBeginning() {
+        // At this point, there is no heartbeat from consumer and seek() wont work... So call poll()
+        poll(pollTimeout)
+        // Now there is a heartbeat and consumer is "alive"
+        seekToBeginning(assignment())
+    }
+
+    private fun KafkaConsumer<Long, String>.seekTo(pointer: Long, p: TopicPartition) {
+        // At this point, there is no heartbeat from consumer and seek() wont work... So call poll()
+        poll(pollTimeout)
+        // Now there is a heartbeat and consumer is "alive"
+        seek(p, pointer)
+    }
+
+    private fun KafkaConsumer<Long, String>.consume(): List<MqTester.Message> = logger.info("Consuming events...").let {
+        poll(pollTimeout).apply { commitAsync() }.map { MqTester.Message(it.value()) }
+    }
+
+    companion object : KLogging() {
         private const val POLL_MILLIS: Long = 1500
     }
 }
