@@ -10,14 +10,14 @@ repositories {
     jcenter()
 }
 ...
-testImplementation "io.github.adven27.env:env-db-postgresql:1.2.3"
-testImplementation "io.github.adven27.env:env-db-mysql:1.2.3"
-testImplementation "io.github.adven27.env:env-db-db2:1.2.3"
-testImplementation "io.github.adven27.env:env-mq-rabbit:1.2.3"
-testImplementation "io.github.adven27.env:env-mq-ibmmq:1.2.3"
-testImplementation "io.github.adven27.env:env-mq-redis:1.2.3"
-testImplementation "io.github.adven27.env:env-grpc-mock:1.2.3"
-testImplementation "io.github.adven27.env:env-wiremock:1.2.3"
+testImplementation "io.github.adven27.env:env-db-postgresql:1.3.0"
+testImplementation "io.github.adven27.env:env-db-mysql:1.3.0"
+testImplementation "io.github.adven27.env:env-db-db2:1.3.0"
+testImplementation "io.github.adven27.env:env-mq-rabbit:1.3.0"
+testImplementation "io.github.adven27.env:env-mq-ibmmq:1.3.0"
+testImplementation "io.github.adven27.env:env-mq-redis:1.3.0"
+testImplementation "io.github.adven27.env:env-grpc-mock:1.3.0"
+testImplementation "io.github.adven27.env:env-wiremock:1.3.0"
 ```
 2. Set up systems:
 ```kotlin
