@@ -6,6 +6,4 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
-    api "redis.clients:jedis:3.3.0"
-    implementation "org.adven.concordion.ext:exam-mq:$exam_version"
 }

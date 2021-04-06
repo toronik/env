@@ -132,7 +132,7 @@ data class IbmMqConfig @JvmOverloads constructor(
     @Suppress("unused")
     val jmsTester3 = jmsConfig(devQueue3.value)
 
-    private fun jmsConfig(q: String) = JmsTester.Config(host.value, port.value.toInt(), q, manager.value, channel.value)
+    private fun jmsConfig(q: String) = Config(host.value, port.value.toInt(), q, manager.value, channel.value)
 
     constructor(
         host: String = "localhost",
@@ -155,9 +155,10 @@ data class IbmMqConfig @JvmOverloads constructor(
             devQueue1.pair(),
             devQueue2.pair(),
             devQueue3.pair()
-        )
-            .setProperties()
+        ).setProperties()
     }
+
+    data class Config(val host: String, val port: Int, val queue: String, val manager: String, val channel: String)
 
     companion object : KLogging() {
         const val PROP_HOST = "env.mq.ibm.host"
