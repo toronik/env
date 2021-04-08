@@ -6,18 +6,14 @@ Java library for a microservice environment emulation
 ### How to use
 1. Add needed dependencies:
 ```groovy
-repositories {
-    jcenter()
-}
-...
-testImplementation "io.github.adven27.env:env-db-postgresql:1.3.0"
-testImplementation "io.github.adven27.env:env-db-mysql:1.3.0"
-testImplementation "io.github.adven27.env:env-db-db2:1.3.0"
-testImplementation "io.github.adven27.env:env-mq-rabbit:1.3.0"
-testImplementation "io.github.adven27.env:env-mq-ibmmq:1.3.0"
-testImplementation "io.github.adven27.env:env-mq-redis:1.3.0"
-testImplementation "io.github.adven27.env:env-grpc-mock:1.3.0"
-testImplementation "io.github.adven27.env:env-wiremock:1.3.0"
+testImplementation "io.github.adven27:env-db-postgresql:2.0.0"
+testImplementation "io.github.adven27:env-db-mysql:2.0.0"
+testImplementation "io.github.adven27:env-db-db2:2.0.0"
+testImplementation "io.github.adven27:env-mq-rabbit:2.0.0"
+testImplementation "io.github.adven27:env-mq-ibmmq:2.0.0"
+testImplementation "io.github.adven27:env-mq-redis:2.0.0"
+testImplementation "io.github.adven27:env-grpc-mock:2.0.0"
+testImplementation "io.github.adven27:env-wiremock:2.0.0"
 ```
 2. Set up systems:
 ```kotlin

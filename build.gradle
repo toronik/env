@@ -3,20 +3,18 @@ buildscript {
     ext.testContainers_version = '1.15.2'
     ext.wiremock_version = '2.27.2'
     ext.klogging_version = '2.0.6'
-    ext.libVersion = "1.3.0"
-    ext.libGroup = 'io.github.adven27.env'
+    ext.libVersion = "2.0.0"
+    ext.libGroup = 'io.github.adven27'
     repositories {
         mavenCentral()
-        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.14.2"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
     }
 }
 
-group libGroup
+group = libGroup
 version = libVersion
 
 subprojects {
@@ -27,8 +25,17 @@ subprojects {
 
     repositories {
         mavenCentral()
-        jcenter()
+        jcenter {
+            content {
+                // Only download the 'kotlinx-html-jvm' module from JCenter, but nothing else.
+                // detekt needs 'kotlinx-html-jvm' for the HTML report.
+                includeModule("org.jetbrains.kotlinx", "kotlinx-html-jvm")
+            }
+        }
     }
+
+    group = libGroup
+    version = libVersion
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -57,15 +64,15 @@ subprojects {
 }
 
 task publish {
-    dependsOn ":env-core:bintrayUpload"
-    dependsOn ":env-container:bintrayUpload"
-    dependsOn ":env-db-db2:bintrayUpload"
-    dependsOn ":env-db-mysql:bintrayUpload"
-    dependsOn ":env-db-postgresql:bintrayUpload"
-    dependsOn ":env-grpc-mock:bintrayUpload"
-    dependsOn ":env-mq-kafka:bintrayUpload"
-    dependsOn ":env-mq-rabbit:bintrayUpload"
-    dependsOn ":env-mq-redis:bintrayUpload"
-    dependsOn ":env-mq-ibmmq:bintrayUpload"
-    dependsOn ":env-wiremock:bintrayUpload"
+    dependsOn ":env-core:uploadArchives"
+    dependsOn ":env-container:uploadArchives"
+    dependsOn ":env-db-db2:uploadArchives"
+    dependsOn ":env-db-mysql:uploadArchives"
+    dependsOn ":env-db-postgresql:uploadArchives"
+    dependsOn ":env-grpc-mock:uploadArchives"
+    dependsOn ":env-mq-kafka:uploadArchives"
+    dependsOn ":env-mq-rabbit:uploadArchives"
+    dependsOn ":env-mq-redis:uploadArchives"
+    dependsOn ":env-mq-ibmmq:uploadArchives"
+    dependsOn ":env-wiremock:uploadArchives"
 }

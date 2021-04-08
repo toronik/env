@@ -6,76 +6,63 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 javadoc.failOnError = false
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
-    from javadoc.destinationDir
+    from javadoc
 }
 
 artifacts {
-    archives sourcesJar
-    archives javadocJar
+    archives sourcesJar, javadocJar
 }
 
-def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution "repo"
-        }
-    }
-    developers {
-        developer {
-            id "Adven27"
-            name "Nikolai Toropanov"
-            email "n.toropanov@gmail.com"
-        }
-    }
-
-    scm {
-        url "https://github.com/Adven27/env"
+apply plugin: 'signing'
+signing {
+    if (project.hasProperty('signingKey') && project.hasProperty('signingPassword')) {
+        useInMemoryPgpKeys(project.getProperty('signingKey'), project.getProperty('signingPassword'))
+        sign configurations.archives
     }
 }
 
-apply plugin: 'maven-publish'
-publishing {
-    publications {
-        mavenPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar {
-                classifier "sources"
-            }
-            artifact javadocJar {
-                classifier "javadoc"
-            }
-            groupId libGroup
-            artifactId project.name
-            version libVersion
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'Java library for a microservice environment emulation')
-                root.appendNode('name', 'env')
-                root.appendNode('url', 'https://github.com/Adven27/env')
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
+apply plugin: 'maven'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-apply plugin: 'com.jfrog.bintray'
-bintray {
-    user = "adven27"
-    key = System.getenv("bintrayKey")
-    publications = ['mavenPublication']
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.getenv("ossrhUsername"), password: System.getenv("ossrhPassword"))
+            }
 
-    pkg {
-        repo = 'env'
-        name = project.name
-        userOrg = 'adven27'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/Adven27/env.git'
-        version {
-            name = libVersion
-            desc = "Java library for a microservice environment emulation"
-            released = new Date()
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: System.getenv("ossrhUsername"), password: System.getenv("ossrhPassword"))
+            }
+
+            pom.project {
+                name project.name
+                packaging 'jar'
+                artifactId project.name
+                description 'Java library for a microservice environment emulation'
+                url 'https://github.com/Adven27/env'
+
+                licenses {
+                    license {
+                        name "The Apache Software License, Version 2.0"
+                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id "Adven27"
+                        name "Nikolai Toropanov"
+                        email "n.toropanov@gmail.com"
+                    }
+                }
+
+                scm {
+                    url "https://github.com/Adven27/env"
+                    connection 'scm:git:git://github.com/Adven27/env.git'
+                    developerConnection 'scm:git:git://github.com/Adven27/env.git'
+                }
+            }
         }
     }
 }
