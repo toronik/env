@@ -61,3 +61,8 @@ signing {
         sign publishing.publications.mavenJava
     }
 }
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
