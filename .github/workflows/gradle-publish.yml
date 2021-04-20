@@ -1,5 +1,5 @@
 # This workflow will build a package using Gradle and then publish it to Maven
-name: Bintray Publish
+name: Maven Publish
 
 on:
   release:
@@ -18,7 +18,7 @@ jobs:
         java-version: 1.8
 
     - name: Build
-      run: gradle build
+      run: gradle build -x test
 
     - name: Publish
       run: gradle publishMaven

@@ -17,7 +17,7 @@ apply plugin: 'signing'
 signing {
     if (project.hasProperty('signingKey') && project.hasProperty('signingPassword')) {
         useInMemoryPgpKeys(project.getProperty('signingKey'), project.getProperty('signingPassword'))
-        sign publishing.publications.mavenJava
+        sign configurations.archives
     }
 }
 
