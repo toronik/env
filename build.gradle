@@ -69,6 +69,7 @@ task publishMaven {
     dependsOn ":env-db-db2:publish"
     dependsOn ":env-db-mysql:publish"
     dependsOn ":env-db-postgresql:publish"
+    dependsOn ":env-db-oracle:publish"
     dependsOn ":env-grpc-mock:publish"
     dependsOn ":env-mq-kafka:publish"
     dependsOn ":env-mq-rabbit:publish"
