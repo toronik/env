@@ -1,4 +1,4 @@
-package io.github.adven27.env.db.mysql
+package io.github.adven27.env.db.oracle
 
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.setProperties
@@ -8,28 +8,30 @@ import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.PortsExposingStrategy
 import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
 import mu.KLogging
-import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.containers.OracleContainer
 import org.testcontainers.utility.DockerImageName
 
 @Suppress("LongParameterList")
-class MySqlContainerSystem @JvmOverloads constructor(
+class OracleContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
-    fixedPort: Int = MYSQL_PORT,
+    fixedPort: Int = PORT,
     private var config: Config = Config(),
-    private val afterStart: MySqlContainerSystem.() -> Unit = { }
-) : MySQLContainer<Nothing>(dockerImageName), ExternalSystem {
+    private val afterStart: OracleContainerSystem.() -> Unit = { }
+) : OracleContainer(dockerImageName), ExternalSystem {
 
     @JvmOverloads
-    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MySqlContainerSystem.() -> Unit) : this(
+    constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: OracleContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
         afterStart = afterStart
     )
 
     init {
         if (portsExposingStrategy.fixedPorts()) {
-            addFixedExposedPort(fixedPort, MYSQL_PORT)
+            addFixedExposedPort(fixedPort, PORT)
         }
+        withEnv("ORACLE_ALLOW_REMOTE", "true")
+        withEnv("ORACLE_DISABLE_ASYNCH_IO", "true")
     }
 
     override fun start() {
@@ -38,8 +40,6 @@ class MySqlContainerSystem @JvmOverloads constructor(
         apply(afterStart)
     }
 
-    override fun running() = isRunning
-
     private fun Config.refreshValues() = Config(
         jdbcUrl.name set getJdbcUrl(),
         username.name set getUsername(),
@@ -47,15 +47,17 @@ class MySqlContainerSystem @JvmOverloads constructor(
         driver.name set driverClassName
     )
 
+    override fun running() = isRunning
+
     fun config() = config
 
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
-        var jdbcUrl: Prop = PROP_URL set "jdbc:mysql://localhost:$MYSQL_PORT/test?autoReconnect=true&useSSL=false",
-        var username: Prop = PROP_USER set "test",
-        var password: Prop = PROP_PASSWORD set "test",
-        var driver: Prop = PROP_DRIVER set "com.mysql.cj.jdbc.Driver"
+        var jdbcUrl: Prop = PROP_URL set "jdbc:oracle:thin:system/oracle@localhost:$PORT:xe",
+        var username: Prop = PROP_USER set "system",
+        var password: Prop = PROP_PASSWORD set "oracle",
+        var driver: Prop = PROP_DRIVER set "oracle.jdbc.OracleDriver"
     ) {
         init {
             asMap().setProperties()
@@ -71,12 +73,13 @@ class MySqlContainerSystem @JvmOverloads constructor(
     }
 
     companion object : KLogging() {
-        const val PROP_URL = "env.db.mysql.url"
-        const val PROP_USER = "env.db.mysql.username"
-        const val PROP_PASSWORD = "env.db.mysql.password"
-        const val PROP_DRIVER = "env.db.mysql.driver"
+        const val PROP_URL = "env.db.oracle.url"
+        const val PROP_USER = "env.db.oracle.username"
+        const val PROP_PASSWORD = "env.db.oracle.password"
+        const val PROP_DRIVER = "env.db.oracle.driver"
+        private const val PORT = 1521
 
         @JvmField
-        val DEFAULT_IMAGE = "mysql:5.7.22".parseImage()
+        val DEFAULT_IMAGE = "oracleinanutshell/oracle-xe-11g".parseImage()
     }
 }

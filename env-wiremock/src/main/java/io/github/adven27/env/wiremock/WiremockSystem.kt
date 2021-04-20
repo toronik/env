@@ -12,13 +12,12 @@ import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
 class WiremockSystem @JvmOverloads constructor(
     val server: WireMockServer,
     afterStart: WireMockServer.() -> Unit = { }
-) :
-    GenericExternalSystem<WireMockServer>(
-        system = server,
-        start = { it.start(); it.afterStart() },
-        stop = { it.stop() },
-        running = { it.isRunning }
-    ) {
+) : GenericExternalSystem<WireMockServer>(
+    system = server,
+    start = { it.start(); it.afterStart() },
+    stop = { it.stop() },
+    running = { it.isRunning }
+) {
 
     constructor(afterStart: WireMockServer.() -> Unit) : this(afterStart = afterStart, fixedPort = 8888)
 

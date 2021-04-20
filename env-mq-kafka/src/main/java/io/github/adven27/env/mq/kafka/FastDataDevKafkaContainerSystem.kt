@@ -40,13 +40,17 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
 
     fun config() = config
 
+    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
+
     data class Config @JvmOverloads constructor(
         val host: Prop = "env.mq.kafka.host" set "localhost",
         val port: Prop = "env.mq.kafka.port" set PORT.toString()
     ) {
         init {
-            mapOf(host.pair(), port.pair()).setProperties()
+            asMap().setProperties()
         }
+
+        fun asMap() = mapOf(host.pair(), port.pair())
     }
 
     companion object : KLogging() {

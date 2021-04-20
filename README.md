@@ -6,14 +6,15 @@ Java library for a microservice environment emulation
 ### How to use
 1. Add needed dependencies:
 ```groovy
-testImplementation "io.github.adven27:env-db-postgresql:2.0.0"
-testImplementation "io.github.adven27:env-db-mysql:2.0.0"
-testImplementation "io.github.adven27:env-db-db2:2.0.0"
-testImplementation "io.github.adven27:env-mq-rabbit:2.0.0"
-testImplementation "io.github.adven27:env-mq-ibmmq:2.0.0"
-testImplementation "io.github.adven27:env-mq-redis:2.0.0"
-testImplementation "io.github.adven27:env-grpc-mock:2.0.0"
-testImplementation "io.github.adven27:env-wiremock:2.0.0"
+testImplementation "io.github.adven27:env-db-postgresql:2.1.0"
+testImplementation "io.github.adven27:env-db-mysql:2.1.0"
+testImplementation "io.github.adven27:env-db-oracle:2.1.0"
+testImplementation "io.github.adven27:env-db-db2:2.1.0"
+testImplementation "io.github.adven27:env-mq-rabbit:2.1.0"
+testImplementation "io.github.adven27:env-mq-ibmmq:2.1.0"
+testImplementation "io.github.adven27:env-mq-redis:2.1.0"
+testImplementation "io.github.adven27:env-grpc-mock:2.1.0"
+testImplementation "io.github.adven27:env-wiremock:2.1.0"
 ```
 2. Set up systems:
 ```kotlin
@@ -23,6 +24,7 @@ class SomeEnvironment : Environment(
         "IBMMQ" to IbmMQContainerSystem(),
         "REDIS" to RedisContainerSystem(),
         "POSTGRES" to PostgreSqlContainerSystem(),
+        "ORACLE" to OracleContainerSystem(),
         "MYSQL" to MySqlContainerSystem(),
         "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
             withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
@@ -70,7 +72,8 @@ task runEnv(type: JavaExec) {
     group = "Execution"
     description = "Run some environment"
     classpath = sourceSets.test.runtimeClasspath
-    main = "env.core.EnvStarter"
+    main = "io.github.adven27.env.core.EnvStarter"
+
     args 'SomeEnvironment'
     systemProperty 'SPECS_ENV_START', true
     systemProperty 'SPECS_ENV_FIXED', true

@@ -49,6 +49,8 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
 
     fun config() = config
 
+    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
+
     data class Config @JvmOverloads constructor(
         var jdbcUrl: Prop = PROP_URL set "jdbc:postgresql://localhost:$POSTGRESQL_PORT/postgres?stringtype=unspecified",
         var username: Prop = PROP_USER set "test",
@@ -56,8 +58,10 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
         var driver: Prop = PROP_DRIVER set "org.postgresql.Driver"
     ) {
         init {
-            mapOf(jdbcUrl.pair(), username.pair(), password.pair(), driver.pair()).setProperties()
+            asMap().setProperties()
         }
+
+        fun asMap() = mapOf(jdbcUrl.pair(), username.pair(), password.pair(), driver.pair())
 
         constructor(url: String, username: String, password: String) : this(
             PROP_URL set url,

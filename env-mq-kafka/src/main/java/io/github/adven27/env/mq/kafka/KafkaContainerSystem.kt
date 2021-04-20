@@ -64,6 +64,8 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     @Suppress("unused")
     fun config(): Config = config
 
+    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
+
     private fun createTopics(topicNameAndPartitionCount: Map<String, Int>) =
         AdminClient.create(mapOf(BOOTSTRAP_SERVERS_CONFIG to config.bootstrapServers.value)).use { admin ->
             admin.createTopics(
@@ -73,8 +75,10 @@ open class KafkaContainerSystem @JvmOverloads constructor(
 
     data class Config(val bootstrapServers: Prop = PROP_BOOTSTRAPSERVERS set "PLAINTEXT://localhost:$KAFKA_PORT") {
         init {
-            mapOf(bootstrapServers.pair()).setProperties()
+            asMap().setProperties()
         }
+
+        fun asMap() = mapOf(bootstrapServers.pair())
     }
 
     companion object : KLogging() {

@@ -65,6 +65,8 @@ class IbmMQContainerSystem @JvmOverloads constructor(
 
     fun config() = config
 
+    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
+
     companion object : KLogging() {
         private const val PORT = 1414
         private const val PORT_ADM = 9443
@@ -147,16 +149,18 @@ data class IbmMqConfig @JvmOverloads constructor(
     )
 
     init {
-        mapOf(
-            host.pair(),
-            port.pair(),
-            manager.pair(),
-            channel.pair(),
-            devQueue1.pair(),
-            devQueue2.pair(),
-            devQueue3.pair()
-        ).setProperties()
+        asMap().setProperties()
     }
+
+    fun asMap(): Map<String, String> = mapOf(
+        host.pair(),
+        port.pair(),
+        manager.pair(),
+        channel.pair(),
+        devQueue1.pair(),
+        devQueue2.pair(),
+        devQueue3.pair()
+    )
 
     data class Config(val host: String, val port: Int, val queue: String, val manager: String, val channel: String)
 

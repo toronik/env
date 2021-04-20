@@ -44,13 +44,17 @@ open class RabbitContainerSystem @JvmOverloads constructor(
     @Suppress("unused")
     fun config(): Config = config
 
+    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
+
     data class Config constructor(
         val host: Prop = PROP_HOST set "localhost",
         val port: Prop = PROP_PORT set PORT.toString()
     ) {
         init {
-            mapOf(host.pair(), port.pair()).setProperties()
+            asMap().setProperties()
         }
+
+        fun asMap() = mapOf(host.pair(), port.pair())
     }
 
     companion object : KLogging() {
