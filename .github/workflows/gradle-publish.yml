@@ -1,4 +1,4 @@
-# This workflow will build a package using Gradle and then publish it to Bintray packages when a release is created
+# This workflow will build a package using Gradle and then publish it to Maven
 name: Bintray Publish
 
 on:
@@ -20,10 +20,12 @@ jobs:
     - name: Build
       run: gradle build
 
-    - name: Publish to Bintray
-      run: gradle publish
+    - name: Publish
+      run: gradle publishMaven
       env:
         ossrhUsername: ${{ secrets.OSSRHUSERNAME }}
         ossrhPassword: ${{ secrets.OSSRHPASSWORD }}
+        ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.OSSRHUSERNAME }}
+        ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.OSSRHPASSWORD }}
         ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGKEY }}
         ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGPASSWORD }}

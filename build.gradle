@@ -63,16 +63,16 @@ subprojects {
     apply from: "$rootDir/gradle/linters.gradle"
 }
 
-task publish {
-    dependsOn ":env-core:uploadArchives"
-    dependsOn ":env-container:uploadArchives"
-    dependsOn ":env-db-db2:uploadArchives"
-    dependsOn ":env-db-mysql:uploadArchives"
-    dependsOn ":env-db-postgresql:uploadArchives"
-    dependsOn ":env-grpc-mock:uploadArchives"
-    dependsOn ":env-mq-kafka:uploadArchives"
-    dependsOn ":env-mq-rabbit:uploadArchives"
-    dependsOn ":env-mq-redis:uploadArchives"
-    dependsOn ":env-mq-ibmmq:uploadArchives"
-    dependsOn ":env-wiremock:uploadArchives"
+task publishMaven {
+    dependsOn ":env-core:publish"
+    dependsOn ":env-container:publish"
+    dependsOn ":env-db-db2:publish"
+    dependsOn ":env-db-mysql:publish"
+    dependsOn ":env-db-postgresql:publish"
+    dependsOn ":env-grpc-mock:publish"
+    dependsOn ":env-mq-kafka:publish"
+    dependsOn ":env-mq-rabbit:publish"
+    dependsOn ":env-mq-redis:publish"
+    dependsOn ":env-mq-ibmmq:publish"
+    dependsOn ":env-wiremock:publish"
 }
