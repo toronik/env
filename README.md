@@ -64,7 +64,7 @@ class MyTestClass {
 
 ### Run as standalone process
 
-Environment class implementation could be run as standalone java application with `env.core.EnvStarter`
+Environment class implementation could be run as standalone java application with `io.github.adven27.env.core.EnvStarter`
 
 For example as gradle task:
 ```groovy
