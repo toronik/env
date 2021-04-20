@@ -21,7 +21,7 @@ signing {
     }
 }
 
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 uploadArchives {
     repositories {
         mavenDeployer {
