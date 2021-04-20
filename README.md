@@ -80,3 +80,8 @@ task runEnv(type: JavaExec) {
     standardInput = System.in
 }
 ``` 
+
+## Examples
+
+For more info see [demo project](https://github.com/Adven27/service-tests/blob/master/demo/src/test/kotlin/specs/Specs.kt#L51)
+
