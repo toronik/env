@@ -22,6 +22,7 @@ class SomeEnvironment : Environment(
     mapOf(
         "RABBIT" to RabbitContainerSystem(),
         "IBMMQ" to IbmMQContainerSystem(),
+        "KAFKA" to KafkaContainerSystem(),
         "REDIS" to RedisContainerSystem(),
         "POSTGRES" to PostgreSqlContainerSystem(),
         "ORACLE" to OracleContainerSystem(),

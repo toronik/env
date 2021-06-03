@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+apply from: "$rootDir/gradle/publish.gradle"
+
+dependencies {
+    api project(':env-core')
+    api("org.springframework.kafka:spring-kafka-test:2.7.1")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+}
