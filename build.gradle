@@ -3,7 +3,7 @@ buildscript {
     ext.testContainers_version = '1.15.2'
     ext.wiremock_version = '2.27.2'
     ext.klogging_version = '2.0.6'
-    ext.libVersion = "2.2.0"
+    ext.libVersion = "2.2.1"
     ext.libGroup = 'io.github.adven27'
     repositories {
         mavenCentral()
@@ -72,6 +72,7 @@ task publishMaven {
     dependsOn ":env-db-oracle:publish"
     dependsOn ":env-grpc-mock:publish"
     dependsOn ":env-mq-kafka:publish"
+    dependsOn ":env-mq-kafka-embedded:publish"
     dependsOn ":env-mq-rabbit:publish"
     dependsOn ":env-mq-redis:publish"
     dependsOn ":env-mq-ibmmq:publish"
