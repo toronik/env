@@ -26,7 +26,7 @@ class EnvTest {
         sut = SomeEnvironment().apply { up() }
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
-        assertEquals("5672", sut.rabbit().config().port)
+        assertEquals(5672, sut.rabbit().config().port)
         assertEquals("5672", System.getProperty("env.mq.rabbit.port"))
         assertEquals(PG_URL, sut.postgres().config().jdbcUrl)
         assertEquals(PG_URL, System.getProperty("env.db.postgresql.url"))
@@ -39,7 +39,7 @@ class EnvTest {
         sut = SomeEnvironment().apply { up() }
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
-        assertNotEquals("5672", sut.rabbit().config().port)
+        assertNotEquals(5672, sut.rabbit().config().port)
         assertNotEquals(PG_URL, sut.postgres().config().jdbcUrl)
     }
 
