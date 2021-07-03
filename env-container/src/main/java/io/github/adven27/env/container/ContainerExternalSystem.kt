@@ -8,11 +8,15 @@ import org.testcontainers.utility.DockerImageName
  * System implementation based on docker container
  */
 @Suppress("unused")
-open class ContainerExternalSystem<T : GenericContainer<*>>(system: T) : GenericExternalSystem<T>(
+open class ContainerExternalSystem<T : GenericContainer<*>> @JvmOverloads constructor(
+    system: T,
+    afterStart: T.() -> Unit = { }
+) : GenericExternalSystem<T>(
     system,
     start = { it.start() },
     stop = { it.stop() },
-    running = { it.isRunning }
+    running = { it.isRunning },
+    afterStart = afterStart,
 )
 
 fun String.parseImage(): DockerImageName = DockerImageName.parse(this)

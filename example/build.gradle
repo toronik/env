@@ -8,6 +8,7 @@ dependencies {
     testImplementation project(":env-db-postgresql")
     testImplementation project(":env-db-mysql")
     testImplementation project(":env-db-db2")
+    testImplementation project(":env-db-oracle")
     testImplementation project(":env-mq-kafka")
     testImplementation project(":env-mq-rabbit")
     testImplementation project(":env-mq-ibmmq")

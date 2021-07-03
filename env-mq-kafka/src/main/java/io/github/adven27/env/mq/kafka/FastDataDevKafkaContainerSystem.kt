@@ -1,8 +1,6 @@
 package io.github.adven27.env.mq.kafka
 
-import io.github.adven27.env.core.Environment.Companion.setProperties
-import io.github.adven27.env.core.Environment.Prop
-import io.github.adven27.env.core.Environment.Prop.Companion.set
+import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.PortsExposingStrategy
 import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
@@ -11,6 +9,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration.ofSeconds
 
+@Suppress("unused")
 open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DockerImageName.parse(IMAGE),
     portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
@@ -34,23 +33,23 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
 
     override fun start() {
         super.start()
-        config = Config(config.host.name set host, config.port.name set getMappedPort(PORT).toString())
+        config = Config(host, getMappedPort(PORT))
         apply(afterStart)
     }
 
-    fun config() = config
+    override fun config() = config
 
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
-        val host: Prop = "env.mq.kafka.host" set "localhost",
-        val port: Prop = "env.mq.kafka.port" set PORT.toString()
+        val host: String = "localhost",
+        val port: Int = PORT
     ) {
         init {
-            asMap().setProperties()
+            asMap().propagateToSystemProperties()
         }
 
-        fun asMap() = mapOf(host.pair(), port.pair())
+        fun asMap() = mapOf("env.mq.kafka.host" to host, "env.mq.kafka.port" to port.toString())
     }
 
     companion object : KLogging() {

@@ -12,14 +12,23 @@ import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
 
-open class Environment(val config: Config, val systems: Map<String, ExternalSystem>) {
-    @JvmOverloads
+open class Environment @JvmOverloads constructor(
+    val systems: Map<String, ExternalSystem>,
+    val config: Config = FromSystemProperty().resolve()
+) {
+    constructor(
+        config: Config = FromSystemProperty().resolve(),
+        vararg systems: Pair<String, ExternalSystem>
+    ) : this(systems.toMap(), config)
+
+    constructor(
+        vararg systems: Pair<String, ExternalSystem>
+    ) : this(systems.toMap())
+
     constructor(
         systems: Map<String, ExternalSystem>,
-        configResolver: ConfigResolver = FromSystemProperty()
-    ) : this(configResolver.resolve(), systems)
-
-    constructor(vararg systems: Pair<String, ExternalSystem>) : this(systems.toMap())
+        configResolver: ConfigResolver
+    ) : this(systems, configResolver.resolve())
 
     init {
         logger.info("Environment settings:\nSystems: $systems\nConfig: $config")
@@ -93,28 +102,24 @@ open class Environment(val config: Config, val systems: Map<String, ExternalSyst
         fun String.fromPropertyOrElse(orElse: Boolean) = System.getProperty(this, orElse.toString()).toBoolean()
 
         @JvmStatic
-        fun Map<String, String>.setProperties() = this.forEach { (p, v) ->
+        fun Map<String, String>.propagateToSystemProperties() = this.forEach { (p, v) ->
             System.setProperty(p, v).also { logger.info("Set system property : $p = ${System.getProperty(p)}") }
         }
     }
 
     class StartupFail(t: Throwable) : RuntimeException(t)
 
-    data class Prop(val name: String, val value: String) {
-        fun pair() = name to value
-
-        companion object {
-            infix fun String.set(value: String) = Prop(this, value)
-        }
-    }
-
-    data class Config(val downTimeout: Long, val upTimeout: Long, val startEnv: Boolean)
+    data class Config @JvmOverloads constructor(
+        val downTimeout: Long = 10L,
+        val upTimeout: Long = 300L,
+        val startEnv: Boolean = true
+    )
 
     interface ConfigResolver {
         fun resolve(): Config
 
         @Suppress("MagicNumber")
-        class FromSystemProperty(
+        class FromSystemProperty @JvmOverloads constructor(
             private val startEnvProperty: String = "SPECS_ENV_START",
             private val upTimeoutProperty: String = "SPECS_ENV_UP_TIMEOUT_SEC",
             private val downTimeoutProperty: String = "SPECS_ENV_DOWN_TIMEOUT_SEC",

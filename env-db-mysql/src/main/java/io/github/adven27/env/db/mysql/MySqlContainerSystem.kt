@@ -1,9 +1,7 @@
 package io.github.adven27.env.db.mysql
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.setProperties
-import io.github.adven27.env.core.Environment.Prop
-import io.github.adven27.env.core.Environment.Prop.Companion.set
+import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.PortsExposingStrategy
 import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
@@ -34,48 +32,38 @@ class MySqlContainerSystem @JvmOverloads constructor(
 
     override fun start() {
         super.start()
-        config = config.refreshValues()
+        config = Config(jdbcUrl, username, password, driverClassName)
         apply(afterStart)
     }
 
     override fun running() = isRunning
 
-    private fun Config.refreshValues() = Config(
-        jdbcUrl.name set getJdbcUrl(),
-        username.name set getUsername(),
-        password.name set getPassword(),
-        driver.name set driverClassName
-    )
-
-    fun config() = config
+    override fun config() = config
 
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
-        var jdbcUrl: Prop = PROP_URL set "jdbc:mysql://localhost:$MYSQL_PORT/test?autoReconnect=true&useSSL=false",
-        var username: Prop = PROP_USER set "test",
-        var password: Prop = PROP_PASSWORD set "test",
-        var driver: Prop = PROP_DRIVER set "com.mysql.cj.jdbc.Driver"
+        var jdbcUrl: String = "jdbc:mysql://localhost:$MYSQL_PORT/test?autoReconnect=true&useSSL=false",
+        var username: String = "test",
+        var password: String = "test",
+        var driver: String = "com.mysql.cj.jdbc.Driver"
     ) {
-        init {
-            asMap().setProperties()
+        companion object {
+            const val PROP_URL = "env.db.mysql.url"
+            const val PROP_USER = "env.db.mysql.username"
+            const val PROP_PASSWORD = "env.db.mysql.password"
+            const val PROP_DRIVER = "env.db.mysql.driver"
         }
 
-        fun asMap() = mapOf(jdbcUrl.pair(), username.pair(), password.pair(), driver.pair())
+        init {
+            asMap().propagateToSystemProperties()
+        }
 
-        constructor(url: String, username: String, password: String) : this(
-            PROP_URL set url,
-            PROP_USER set username,
-            PROP_PASSWORD set password
-        )
+        fun asMap() =
+            mapOf(PROP_URL to jdbcUrl, PROP_USER to username, PROP_PASSWORD to password, PROP_DRIVER to driver)
     }
 
     companion object : KLogging() {
-        const val PROP_URL = "env.db.mysql.url"
-        const val PROP_USER = "env.db.mysql.username"
-        const val PROP_PASSWORD = "env.db.mysql.password"
-        const val PROP_DRIVER = "env.db.mysql.driver"
-
         @JvmField
         val DEFAULT_IMAGE = "mysql:5.7.22".parseImage()
     }

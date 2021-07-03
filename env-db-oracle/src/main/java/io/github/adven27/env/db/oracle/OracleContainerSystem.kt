@@ -1,9 +1,7 @@
 package io.github.adven27.env.db.oracle
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.setProperties
-import io.github.adven27.env.core.Environment.Prop
-import io.github.adven27.env.core.Environment.Prop.Companion.set
+import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.PortsExposingStrategy
 import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
@@ -36,47 +34,38 @@ class OracleContainerSystem @JvmOverloads constructor(
 
     override fun start() {
         super.start()
-        config = config.refreshValues()
+        config = Config(jdbcUrl, username, password, driverClassName)
         apply(afterStart)
     }
 
-    private fun Config.refreshValues() = Config(
-        jdbcUrl.name set getJdbcUrl(),
-        username.name set getUsername(),
-        password.name set getPassword(),
-        driver.name set driverClassName
-    )
-
     override fun running() = isRunning
 
-    fun config() = config
+    override fun config() = config
 
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
-        var jdbcUrl: Prop = PROP_URL set "jdbc:oracle:thin:system/oracle@localhost:$PORT:xe",
-        var username: Prop = PROP_USER set "system",
-        var password: Prop = PROP_PASSWORD set "oracle",
-        var driver: Prop = PROP_DRIVER set "oracle.jdbc.OracleDriver"
+        var jdbcUrl: String = "jdbc:oracle:thin:system/oracle@localhost:$PORT:xe",
+        var username: String = "system",
+        var password: String = "oracle",
+        var driver: String = "oracle.jdbc.OracleDriver"
     ) {
-        init {
-            asMap().setProperties()
+        companion object {
+            const val PROP_URL = "env.db.oracle.url"
+            const val PROP_USER = "env.db.oracle.username"
+            const val PROP_PASSWORD = "env.db.oracle.password"
+            const val PROP_DRIVER = "env.db.oracle.driver"
         }
 
-        fun asMap() = mapOf(jdbcUrl.pair(), username.pair(), password.pair(), driver.pair())
+        init {
+            asMap().propagateToSystemProperties()
+        }
 
-        constructor(url: String, username: String, password: String) : this(
-            PROP_URL set url,
-            PROP_USER set username,
-            PROP_PASSWORD set password
-        )
+        fun asMap() =
+            mapOf(PROP_URL to jdbcUrl, PROP_USER to username, PROP_PASSWORD to password, PROP_DRIVER to driver)
     }
 
     companion object : KLogging() {
-        const val PROP_URL = "env.db.oracle.url"
-        const val PROP_USER = "env.db.oracle.username"
-        const val PROP_PASSWORD = "env.db.oracle.password"
-        const val PROP_DRIVER = "env.db.oracle.driver"
         private const val PORT = 1521
 
         @JvmField

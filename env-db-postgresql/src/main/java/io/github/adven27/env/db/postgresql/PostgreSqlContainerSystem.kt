@@ -1,9 +1,7 @@
 package io.github.adven27.env.db.postgresql
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.setProperties
-import io.github.adven27.env.core.Environment.Prop
-import io.github.adven27.env.core.Environment.Prop.Companion.set
+import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.PortsExposingStrategy
 import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
@@ -34,48 +32,39 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
 
     override fun start() {
         super.start()
-        config = config.refreshValues()
+        config = Config(jdbcUrl, username, password, driverClassName)
         apply(afterStart)
     }
 
-    private fun Config.refreshValues() = Config(
-        jdbcUrl.name set getJdbcUrl(),
-        username.name set getUsername(),
-        password.name set getPassword(),
-        driver.name set driverClassName
-    )
-
     override fun running() = isRunning
 
-    fun config() = config
+    override fun config() = config
 
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
-        var jdbcUrl: Prop = PROP_URL set "jdbc:postgresql://localhost:$POSTGRESQL_PORT/postgres?stringtype=unspecified",
-        var username: Prop = PROP_USER set "test",
-        var password: Prop = PROP_PASSWORD set "test",
-        var driver: Prop = PROP_DRIVER set "org.postgresql.Driver"
+        val jdbcUrl: String = "jdbc:postgresql://localhost:$POSTGRESQL_PORT/postgres?stringtype=unspecified",
+        val username: String = "test",
+        val password: String = "test",
+        val driver: String = "org.postgresql.Driver"
     ) {
-        init {
-            asMap().setProperties()
+        companion object {
+            private const val PREFIX = "env.db.postgresql."
+            const val PROP_URL = "${PREFIX}url"
+            const val PROP_USER = "${PREFIX}username"
+            const val PROP_PASSWORD = "${PREFIX}password"
+            const val PROP_DRIVER = "${PREFIX}driver"
         }
 
-        fun asMap() = mapOf(jdbcUrl.pair(), username.pair(), password.pair(), driver.pair())
+        init {
+            asMap().propagateToSystemProperties()
+        }
 
-        constructor(url: String, username: String, password: String) : this(
-            PROP_URL set url,
-            PROP_USER set username,
-            PROP_PASSWORD set password
-        )
+        fun asMap() =
+            mapOf(PROP_URL to jdbcUrl, PROP_USER to username, PROP_PASSWORD to password, PROP_DRIVER to driver)
     }
 
     companion object : KLogging() {
-        const val PROP_URL = "env.db.postgresql.url"
-        const val PROP_USER = "env.db.postgresql.username"
-        const val PROP_PASSWORD = "env.db.postgresql.password"
-        const val PROP_DRIVER = "env.db.postgresql.driver"
-
         @JvmField
         val DEFAULT_IMAGE = "postgres:9.6.12".parseImage()
     }

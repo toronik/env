@@ -1,5 +1,4 @@
 import io.github.adven27.env.core.Environment
-import io.github.adven27.env.core.Environment.Prop
 import io.github.adven27.env.db.mysql.MySqlContainerSystem
 import io.github.adven27.env.db.postgresql.PostgreSqlContainerSystem
 import io.github.adven27.env.grpc.GrpcMockContainerSystem
@@ -27,9 +26,9 @@ class EnvTest {
         sut = SomeEnvironment().apply { up() }
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
-        assertEquals(Prop("env.mq.rabbit.port", "5672"), sut.rabbit().config().port)
+        assertEquals("5672", sut.rabbit().config().port)
         assertEquals("5672", System.getProperty("env.mq.rabbit.port"))
-        assertEquals(Prop("env.db.postgresql.url", PG_URL), sut.postgres().config().jdbcUrl)
+        assertEquals(PG_URL, sut.postgres().config().jdbcUrl)
         assertEquals(PG_URL, System.getProperty("env.db.postgresql.url"))
     }
 
@@ -40,8 +39,8 @@ class EnvTest {
         sut = SomeEnvironment().apply { up() }
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
-        assertNotEquals("5672", sut.rabbit().config().port.value)
-        assertNotEquals(PG_URL, sut.postgres().config().jdbcUrl.value)
+        assertNotEquals("5672", sut.rabbit().config().port)
+        assertNotEquals(PG_URL, sut.postgres().config().jdbcUrl)
     }
 
     @After

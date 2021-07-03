@@ -3,19 +3,10 @@ package io.github.adven27.env.mq.ibmmq
 import com.ibm.mq.jms.MQConnectionFactory
 import com.ibm.msg.client.wmq.WMQConstants.WMQ_CM_CLIENT
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.setProperties
-import io.github.adven27.env.core.Environment.Prop
-import io.github.adven27.env.core.Environment.Prop.Companion.set
+import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.PortsExposingStrategy
 import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
-import io.github.adven27.env.mq.ibmmq.IbmMqConfig.Companion.PROP_CHANNEL
-import io.github.adven27.env.mq.ibmmq.IbmMqConfig.Companion.PROP_DEV_Q1
-import io.github.adven27.env.mq.ibmmq.IbmMqConfig.Companion.PROP_DEV_Q2
-import io.github.adven27.env.mq.ibmmq.IbmMqConfig.Companion.PROP_DEV_Q3
-import io.github.adven27.env.mq.ibmmq.IbmMqConfig.Companion.PROP_HOST
-import io.github.adven27.env.mq.ibmmq.IbmMqConfig.Companion.PROP_MANAGER
-import io.github.adven27.env.mq.ibmmq.IbmMqConfig.Companion.PROP_PORT
 import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
@@ -57,13 +48,13 @@ class IbmMQContainerSystem @JvmOverloads constructor(
 
     override fun start() {
         super.start()
-        config = IbmMqConfig(port = config.port.name set getMappedPort(PORT).toString())
+        config = IbmMqConfig(port = getMappedPort(PORT))
         apply(afterStart)
     }
 
     override fun running() = isRunning
 
-    fun config() = config
+    override fun config() = config
 
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
@@ -98,13 +89,13 @@ data class RemoteMqWithTemporaryQueues(private val connectionFactory: MQConnecti
     init {
         config = connectionFactory.createConnection().createSession(false, AUTO_ACKNOWLEDGE).let { session ->
             IbmMqConfig(
-                host = PROP_HOST set connectionFactory.hostName,
-                port = PROP_PORT set connectionFactory.port.toString(),
-                manager = PROP_MANAGER set connectionFactory.queueManager,
-                channel = PROP_CHANNEL set connectionFactory.channel,
-                devQueue1 = PROP_DEV_Q1 set session.tempQueue(),
-                devQueue2 = PROP_DEV_Q2 set session.tempQueue(),
-                devQueue3 = PROP_DEV_Q3 set session.tempQueue(),
+                host = connectionFactory.hostName,
+                port = connectionFactory.port,
+                manager = connectionFactory.queueManager,
+                channel = connectionFactory.channel,
+                devQueue1 = session.tempQueue(),
+                devQueue2 = session.tempQueue(),
+                devQueue3 = session.tempQueue(),
             )
         }
     }
@@ -117,49 +108,37 @@ data class RemoteMqWithTemporaryQueues(private val connectionFactory: MQConnecti
  * @see <a href="http://github.com/ibm-messaging/mq-container/blob/master/docs/developer-config.md">http://github.com/ibm-messaging</a>
  */
 data class IbmMqConfig @JvmOverloads constructor(
-    val host: Prop = PROP_HOST set "localhost",
-    val port: Prop = PROP_PORT set "1414",
-    val manager: Prop = PROP_MANAGER set "QM1",
-    val channel: Prop = PROP_CHANNEL set "DEV.APP.SVRCONN",
-    val devQueue1: Prop = PROP_DEV_Q1 set "DEV.QUEUE.1",
-    val devQueue2: Prop = PROP_DEV_Q2 set "DEV.QUEUE.2",
-    val devQueue3: Prop = PROP_DEV_Q3 set "DEV.QUEUE.3",
+    val host: String = "localhost",
+    val port: Int = 1414,
+    val manager: String = "QM1",
+    val channel: String = "DEV.APP.SVRCONN",
+    val devQueue1: String = "DEV.QUEUE.1",
+    val devQueue2: String = "DEV.QUEUE.2",
+    val devQueue3: String = "DEV.QUEUE.3",
 ) {
     @Suppress("unused")
-    val jmsTester1 = jmsConfig(devQueue1.value)
+    val jmsTester1 = jmsConfig(devQueue1)
 
     @Suppress("unused")
-    val jmsTester2 = jmsConfig(devQueue2.value)
+    val jmsTester2 = jmsConfig(devQueue2)
 
     @Suppress("unused")
-    val jmsTester3 = jmsConfig(devQueue3.value)
+    val jmsTester3 = jmsConfig(devQueue3)
 
-    private fun jmsConfig(q: String) = Config(host.value, port.value.toInt(), q, manager.value, channel.value)
-
-    constructor(
-        host: String = "localhost",
-        port: Int = 1414,
-        manager: String = "QM1",
-        channel: String = "DEV.APP.SVRCONN"
-    ) : this(
-        host = PROP_HOST set host,
-        port = PROP_PORT set port.toString(),
-        manager = PROP_MANAGER set manager,
-        channel = PROP_CHANNEL set channel,
-    )
+    private fun jmsConfig(q: String) = Config(host, port.toInt(), q, manager, channel)
 
     init {
-        asMap().setProperties()
+        asMap().propagateToSystemProperties()
     }
 
     fun asMap(): Map<String, String> = mapOf(
-        host.pair(),
-        port.pair(),
-        manager.pair(),
-        channel.pair(),
-        devQueue1.pair(),
-        devQueue2.pair(),
-        devQueue3.pair()
+        PROP_HOST to host,
+        PROP_PORT to port.toString(),
+        PROP_MANAGER to manager,
+        PROP_CHANNEL to channel,
+        PROP_DEV_Q1 to devQueue1,
+        PROP_DEV_Q2 to devQueue2,
+        PROP_DEV_Q3 to devQueue3
     )
 
     data class Config(val host: String, val port: Int, val queue: String, val manager: String, val channel: String)

@@ -75,11 +75,11 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
         return fixedEnv ? 10000 : findAvailableTcpPort();
     }
 
-    public int mockPort() {
+    private int mockPort() {
         return isRunning() ? getMappedPort(8888) : 20000 + serviceId;
     }
 
-    public int port() {
+    private int port() {
         return isRunning() ? getMappedPort(50000) : 10000 + serviceId;
     }
 
@@ -96,5 +96,34 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
     @Override
     public String describe() {
         return toString();
+    }
+
+    @NotNull
+    @Override
+    public Object config() {
+        return new Config(port(), mockPort());
+    }
+
+    public static class Config {
+        private final Integer grpcPort;
+        private final Integer mockPort;
+
+        public Config(int grpcPort, int mockPort) {
+            this.grpcPort = grpcPort;
+            this.mockPort = mockPort;
+        }
+
+        public Config() {
+            this.grpcPort = 50000;
+            this.mockPort = 8888;
+        }
+
+        public int getGrpcPort() {
+            return grpcPort;
+        }
+
+        public int getMockPort() {
+            return mockPort;
+        }
     }
 }

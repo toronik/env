@@ -1,9 +1,7 @@
 package io.github.adven27.env.mq.redis
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.setProperties
-import io.github.adven27.env.core.Environment.Prop
-import io.github.adven27.env.core.Environment.Prop.Companion.set
+import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.PortsExposingStrategy
 import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
@@ -38,23 +36,23 @@ class RedisContainerSystem @JvmOverloads constructor(
 
     override fun start() {
         super.start()
-        config = Config(config.host.name set host, config.port.name set firstMappedPort.toString())
+        config = Config(host, firstMappedPort)
         apply(afterStart)
     }
 
-    fun config() = config
-
+    override fun config() = config
+    override fun running() = isRunning
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
-        val host: Prop = "env.mq.redis.host" set "localhost",
-        val port: Prop = "env.mq.redis.port" set PORT.toString()
+        val host: String = "localhost",
+        val port: Int = PORT
     ) {
         init {
-            asMap().setProperties()
+            asMap().propagateToSystemProperties()
         }
 
-        fun asMap() = mapOf(host.pair(), port.pair())
+        fun asMap() = mapOf("env.mq.redis.host" to host, "env.mq.redis.port" to port.toString())
     }
 
     companion object : KLogging() {
@@ -64,6 +62,4 @@ class RedisContainerSystem @JvmOverloads constructor(
         @JvmField
         val DEFAULT_IMAGE = "redis:5.0.3-alpine".parseImage()
     }
-
-    override fun running() = isRunning
 }

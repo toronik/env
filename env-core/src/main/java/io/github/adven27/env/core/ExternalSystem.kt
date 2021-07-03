@@ -10,6 +10,7 @@ interface ExternalSystem {
     fun start()
     fun stop()
     fun running(): Boolean
+    fun config(): Any
     fun describe(): String = toString()
 
     companion object {
@@ -31,10 +32,12 @@ open class GenericExternalSystem<T> @JvmOverloads constructor(
     val system: T,
     private val start: Consumer<T> = Consumer {},
     private val stop: Consumer<T> = Consumer {},
-    private val running: Function<T, Boolean> = Function { true }
+    private val running: Function<T, Boolean> = Function { true },
+    private val afterStart: T.() -> Unit = { }
 ) : ExternalSystem {
     override fun start() {
         start.accept(system)
+        afterStart.invoke(system)
     }
 
     override fun stop() {
@@ -43,6 +46,7 @@ open class GenericExternalSystem<T> @JvmOverloads constructor(
 
     override fun running(): Boolean = running.apply(system)
     override fun describe() = system.toString()
+    override fun config() = Any()
 }
 
 interface PortsExposingStrategy {
