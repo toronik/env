@@ -28,20 +28,20 @@ open class Environment @JvmOverloads constructor(
         logger.info("Environment settings:\nSystems: $systems\nConfig: $config")
     }
 
-    @Suppress("SpreadOperator")
     fun up() {
         if (config.startEnv) {
             try {
                 tryUp()
-            } catch (t: Throwable) {
+            } catch (expected: Throwable) {
                 down()
-                throw t
+                throw expected
             }
         } else {
             logger.info("Skip environment starting.")
         }
     }
 
+    @Suppress("SpreadOperator")
     private fun tryUp() {
         try {
             val elapsed = measureTimeMillis { allOf(*start(systems.entries))[config.upTimeout, SECONDS] }
