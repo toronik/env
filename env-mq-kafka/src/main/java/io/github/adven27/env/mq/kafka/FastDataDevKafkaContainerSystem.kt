@@ -2,8 +2,8 @@ package io.github.adven27.env.mq.kafka
 
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.PortsExposingStrategy
-import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,7 +12,7 @@ import java.time.Duration.ofSeconds
 @Suppress("unused")
 open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DockerImageName.parse(IMAGE),
-    portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
+    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
     fixedPort: Int = PORT,
     fixedPortAdm: Int = PORT_ADM,
     private var config: Config = Config(),
@@ -25,7 +25,7 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
         withExposedPorts(PORT, PORT_ADM)
         withStartupTimeout(ofSeconds(STARTUP_TIMEOUT))
         this.fixedPort = fixedPort
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             addFixedExposedPort(fixedPort, PORT)
             addFixedExposedPort(fixedPortAdm, PORT_ADM)
         }

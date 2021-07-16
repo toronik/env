@@ -2,19 +2,30 @@ package io.github.adven27.env.mq.kafka.embedded
 
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 
 @Suppress("unused")
-open class EmbeddedKafkaSystem(
-    topics: Array<String>,
+open class EmbeddedKafkaSystem(private val embeddedKafka: EmbeddedKafkaBroker) : ExternalSystem {
+
     @Suppress("SpreadOperator")
-    private val embeddedKafka: EmbeddedKafkaBroker = EmbeddedKafkaBroker(
-        NUMBER_OF_BROKERS,
-        CONTROLLED_SHUTDOWN,
-        NUMBER_OF_PARTITIONS,
-        *topics
+    @JvmOverloads
+    constructor(
+        topics: Array<String>,
+        fixedPort: Int = DEFAULT_KAFKA_PORT,
+        fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
+    ) : this(
+        EmbeddedKafkaBroker(
+            NUMBER_OF_BROKERS,
+            CONTROLLED_SHUTDOWN,
+            NUMBER_OF_PARTITIONS,
+            *topics
+        ).apply {
+            if (fixedDynamicEnvironmentStrategy.fixedEnv()) kafkaPorts(fixedPort)
+        }
     )
-) : ExternalSystem {
+
     private var config: Config = Config()
     private var isRunning = false
 

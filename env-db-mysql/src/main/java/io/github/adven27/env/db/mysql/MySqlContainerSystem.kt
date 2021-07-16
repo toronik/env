@@ -3,8 +3,8 @@ package io.github.adven27.env.db.mysql
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.PortsExposingStrategy
-import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.MySQLContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("LongParameterList")
 class MySqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
+    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
     fixedPort: Int = MYSQL_PORT,
     private var config: Config = Config(),
     private val afterStart: MySqlContainerSystem.() -> Unit = { }
@@ -25,7 +25,7 @@ class MySqlContainerSystem @JvmOverloads constructor(
     )
 
     init {
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             addFixedExposedPort(fixedPort, MYSQL_PORT)
         }
     }

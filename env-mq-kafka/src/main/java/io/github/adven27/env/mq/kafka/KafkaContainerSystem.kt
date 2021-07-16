@@ -3,8 +3,8 @@ package io.github.adven27.env.mq.kafka
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.PortsExposingStrategy
-import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG
@@ -15,7 +15,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("unused")
 open class KafkaContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
+    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
     fixedPort: Int = KAFKA_PORT,
     private var config: Config = Config(),
     private val topicNameAndPartitionCount: Map<String, Int> = mapOf(),
@@ -46,7 +46,7 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     )
 
     init {
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             addFixedExposedPort(fixedPort, KAFKA_PORT)
         }
     }

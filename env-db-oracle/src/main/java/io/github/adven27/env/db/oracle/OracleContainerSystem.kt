@@ -3,8 +3,8 @@ package io.github.adven27.env.db.oracle
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.PortsExposingStrategy
-import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.OracleContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("LongParameterList")
 class OracleContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
+    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
     fixedPort: Int = PORT,
     private var config: Config = Config(),
     private val afterStart: OracleContainerSystem.() -> Unit = { }
@@ -25,7 +25,7 @@ class OracleContainerSystem @JvmOverloads constructor(
     )
 
     init {
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             addFixedExposedPort(fixedPort, PORT)
         }
         withEnv("ORACLE_ALLOW_REMOTE", "true")

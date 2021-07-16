@@ -3,8 +3,8 @@ package io.github.adven27.env.mq.redis
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.PortsExposingStrategy
-import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,7 +12,7 @@ import java.time.Duration.ofSeconds
 
 class RedisContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
+    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
     fixedPort: Int = PORT,
     private var config: Config = Config(),
     private val afterStart: RedisContainerSystem.() -> Unit = { }
@@ -29,7 +29,7 @@ class RedisContainerSystem @JvmOverloads constructor(
         withExposedPorts(PORT)
         withStartupTimeout(ofSeconds(STARTUP_TIMEOUT))
         this.fixedPort = fixedPort
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             addFixedExposedPort(fixedPort, PORT)
         }
     }

@@ -3,8 +3,8 @@ package io.github.adven27.env.mq.rabbit
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.PortsExposingStrategy
-import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.RabbitMQContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("unused")
 open class RabbitContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    portsExposingStrategy: PortsExposingStrategy = SystemPropertyToggle(),
+    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
     fixedPort: Int = PORT,
     fixedPortAdm: Int = PORT_ADM,
     private var config: Config = Config(),
@@ -26,7 +26,7 @@ open class RabbitContainerSystem @JvmOverloads constructor(
     )
 
     init {
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             addFixedExposedPort(fixedPort, PORT)
             addFixedExposedPort(fixedPortAdm, PORT_ADM)
         }

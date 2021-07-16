@@ -1,8 +1,8 @@
 package io.github.adven27.env.grpc;
 
 import io.github.adven27.env.core.ExternalSystem;
-import io.github.adven27.env.core.PortsExposingStrategy;
-import io.github.adven27.env.core.PortsExposingStrategy.SystemPropertyToggle;
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy;
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,29 +25,29 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
     private final Consumer<GrpcMockContainerSystem> afterStart;
 
     public GrpcMockContainerSystem(
-        final int serviceId, PortsExposingStrategy portsExposingStrategy, final List<String> protos
+        final int serviceId, FixedDynamicEnvironmentStrategy fixedDynamicEnvironmentStrategy, final List<String> protos
     ) {
-        this(serviceId, portsExposingStrategy, null, protos, c -> { });
+        this(serviceId, fixedDynamicEnvironmentStrategy, null, protos, c -> { });
     }
 
     public GrpcMockContainerSystem(
         final int serviceId,
-        PortsExposingStrategy portsExposingStrategy,
+        FixedDynamicEnvironmentStrategy fixedDynamicEnvironmentStrategy,
         final List<String> protos,
         Consumer<GrpcMockContainerSystem> afterStart
     ) {
-        this(serviceId, portsExposingStrategy, null, protos, afterStart);
+        this(serviceId, fixedDynamicEnvironmentStrategy, null, protos, afterStart);
     }
 
     public GrpcMockContainerSystem(final int serviceId, final List<String> protos) {
         this(serviceId, new SystemPropertyToggle(), null, protos, c -> { });
     }
 
-    public GrpcMockContainerSystem(final int serviceId, PortsExposingStrategy portsExposingStrategy, String wiremock, final List<String> protos, Consumer<GrpcMockContainerSystem> afterStart) {
+    public GrpcMockContainerSystem(final int serviceId, FixedDynamicEnvironmentStrategy fixedDynamicEnvironmentStrategy, String wiremock, final List<String> protos, Consumer<GrpcMockContainerSystem> afterStart) {
         super("adven27/grpc-wiremock");
         this.serviceId = serviceId;
         this.afterStart = afterStart;
-        this.withFixedExposedPort(findAndSetBasePort(portsExposingStrategy.fixedPorts()) + serviceId, 50000)
+        this.withFixedExposedPort(findAndSetBasePort(fixedDynamicEnvironmentStrategy.fixedEnv()) + serviceId, 50000)
             .waitingFor(forLogMessage(".*Started GrpcWiremock.*\\s", 1))
             .withStartupTimeout(ofSeconds(180))
             .withCreateContainerCmdModifier(cmd -> {
@@ -59,7 +59,7 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
         protos.forEach(p -> this.withCopyFileToContainer(MountableFile.forClasspathResource(p), "/proto/" + p));
         Optional.ofNullable(wiremock).ifPresent(w -> this.withClasspathResourceMapping(w, "/wiremock", BindMode.READ_WRITE));
 
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             withFixedExposedPort(20000 + serviceId, 8888);
         }
     }

@@ -2,14 +2,14 @@ package io.github.adven27.env.db.db2
 
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.PortsExposingStrategy
+import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
 import org.testcontainers.containers.Db2Container
 import org.testcontainers.utility.DockerImageName
 
 @Suppress("unused", "LongParameterList")
 class Db2ContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName,
-    portsExposingStrategy: PortsExposingStrategy = PortsExposingStrategy.SystemPropertyToggle(),
+    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = FixedDynamicEnvironmentStrategy.SystemPropertyToggle(),
     fixedPort: Int = DB2_PORT,
     private var config: Config = Config(),
     private val afterStart: Db2ContainerSystem.() -> Unit = { }
@@ -17,7 +17,7 @@ class Db2ContainerSystem @JvmOverloads constructor(
 
     init {
         acceptLicense()
-        if (portsExposingStrategy.fixedPorts()) {
+        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
             addFixedExposedPort(fixedPort, DB2_PORT)
         }
     }

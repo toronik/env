@@ -14,16 +14,10 @@ import kotlin.system.measureTimeMillis
 
 open class Environment @JvmOverloads constructor(
     val systems: Map<String, ExternalSystem>,
-    val config: Config = FromSystemProperty().resolve()
+    val config: Config = Config()
 ) {
-    constructor(
-        config: Config = FromSystemProperty().resolve(),
-        vararg systems: Pair<String, ExternalSystem>
-    ) : this(systems.toMap(), config)
-
-    constructor(
-        vararg systems: Pair<String, ExternalSystem>
-    ) : this(systems.toMap())
+    constructor(config: Config = Config(), vararg systems: Pair<String, ExternalSystem>) : this(systems.toMap(), config)
+    constructor(vararg systems: Pair<String, ExternalSystem>) : this(systems.toMap())
 
     constructor(
         systems: Map<String, ExternalSystem>,
@@ -38,14 +32,23 @@ open class Environment @JvmOverloads constructor(
     fun up() {
         if (config.startEnv) {
             try {
-                val elapsed = measureTimeMillis { allOf(*start(systems.entries))[config.upTimeout, SECONDS] }
-                logger.info(summary(), elapsed)
-            } catch (e: TimeoutException) {
-                logger.error("Startup timeout exceeded: expected ${config.upTimeout}s. ${status()}", e)
-                throw StartupFail(e)
+                tryUp()
+            } catch (t: Throwable) {
+                down()
+                throw t
             }
         } else {
             logger.info("Skip environment starting.")
+        }
+    }
+
+    private fun tryUp() {
+        try {
+            val elapsed = measureTimeMillis { allOf(*start(systems.entries))[config.upTimeout, SECONDS] }
+            logger.info(summary(), elapsed)
+        } catch (e: TimeoutException) {
+            logger.error("Startup timeout exceeded: expected ${config.upTimeout}s. ${status()}", e)
+            throw StartupFail(e)
         }
     }
 
@@ -110,9 +113,9 @@ open class Environment @JvmOverloads constructor(
     class StartupFail(t: Throwable) : RuntimeException(t)
 
     data class Config @JvmOverloads constructor(
-        val downTimeout: Long = 10L,
-        val upTimeout: Long = 300L,
-        val startEnv: Boolean = true
+        val downTimeout: Long = FromSystemProperty().resolve().downTimeout,
+        val upTimeout: Long = FromSystemProperty().resolve().upTimeout,
+        val startEnv: Boolean = FromSystemProperty().resolve().startEnv
     )
 
     interface ConfigResolver {
