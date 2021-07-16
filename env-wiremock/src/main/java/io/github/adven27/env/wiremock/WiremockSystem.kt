@@ -9,11 +9,12 @@ import io.github.adven27.env.core.Environment.Companion.propagateToSystemPropert
 import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
 import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import io.github.adven27.env.core.GenericExternalSystem
+import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.DEFAULT_PORT
 import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.PROP_PORT
 import wiremock.com.github.jknack.handlebars.Helper
 
 open class WiremockSystem @JvmOverloads constructor(
-    val server: WireMockServer,
+    private val server: WireMockServer,
     afterStart: WireMockServer.() -> Unit = { }
 ) : GenericExternalSystem<WireMockServer>(
     system = server,
@@ -35,22 +36,31 @@ open class WiremockSystem @JvmOverloads constructor(
     @JvmOverloads
     constructor(
         helpers: Map<String, Helper<Any>> = mapOf(),
-        fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
-        fixedPort: Int = 8888,
-        afterStart: WireMockServer.() -> Unit = { }
+        afterStart: WireMockServer.() -> Unit = { },
+        additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration = { this },
+        fixedPort: Int = DEFAULT_PORT,
+        fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle()
     ) : this(
         server = WireMockServer(
-            wireMockConfig()
-                .withRootDirectory(WiremockSystem::class.java.getResource("/wiremock").path)
-                .extensions(ResponseTemplateTransformer(true, helpers))
-                .port(
-                    port(fixedDynamicEnvironmentStrategy, fixedPort).apply {
-                        mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
-                    }
-                )
+            additionalConfiguration.invoke(
+                wireMockConfig()
+                    .usingFilesUnderClasspath("wiremock")
+                    .extensions(ResponseTemplateTransformer(true, helpers))
+                    .port(
+                        port(fixedDynamicEnvironmentStrategy, fixedPort).apply {
+                            mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
+                        }
+                    )
+            )
         ),
         afterStart = afterStart
     )
+
+    @Suppress("unused")
+    constructor(
+        additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration,
+        afterStart: WireMockServer.() -> Unit = { },
+    ) : this(mapOf(), afterStart, additionalConfiguration, DEFAULT_PORT, SystemPropertyToggle())
 
     override fun describe() =
         "${system.baseUrl()} registered ${system.listAllStubMappings().mappings.size} mappings. \n\t" +
@@ -58,9 +68,10 @@ open class WiremockSystem @JvmOverloads constructor(
 
     override fun config(): Config = Config(server.port())
 
-    data class Config(val port: Int = 8888) {
+    data class Config(val port: Int = DEFAULT_PORT) {
         companion object {
             const val PROP_PORT = "env.wiremock.port"
+            const val DEFAULT_PORT = 8888
         }
 
         fun asMap() = mapOf(PROP_PORT to port)
