@@ -9,6 +9,7 @@ import io.github.adven27.env.core.Environment.Companion.propagateToSystemPropert
 import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
 import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import io.github.adven27.env.core.GenericExternalSystem
+import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.PROP_PORT
 import wiremock.com.github.jknack.handlebars.Helper
 
 open class WiremockSystem @JvmOverloads constructor(
@@ -44,17 +45,26 @@ open class WiremockSystem @JvmOverloads constructor(
                 .extensions(ResponseTemplateTransformer(true, helpers))
                 .port(
                     port(fixedDynamicEnvironmentStrategy, fixedPort).apply {
-                        mapOf("env.wiremock.port" to this.toString()).propagateToSystemProperties()
+                        mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
                     }
                 )
         ),
         afterStart = afterStart
     )
 
-    override fun describe() = "${system.baseUrl()} registered ${system.listAllStubMappings().mappings.size} mappings."
-    override fun config(): Any = Config(server.port())
+    override fun describe() =
+        "${system.baseUrl()} registered ${system.listAllStubMappings().mappings.size} mappings. \n\t" +
+            config().asMap().entries.joinToString("\n\t") { it.toString() }
 
-    data class Config(val port: Int = 8888)
+    override fun config(): Config = Config(server.port())
+
+    data class Config(val port: Int = 8888) {
+        companion object {
+            const val PROP_PORT = "env.wiremock.port"
+        }
+
+        fun asMap() = mapOf(PROP_PORT to port)
+    }
 
     companion object {
         private fun port(strategy: FixedDynamicEnvironmentStrategy, fixedPort: Int) =

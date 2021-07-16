@@ -5,6 +5,7 @@ import mu.KLogging
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.allOf
 import java.util.concurrent.CompletableFuture.runAsync
+import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.concurrent.Executors.newCachedThreadPool
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit.SECONDS
@@ -44,8 +45,11 @@ open class Environment @JvmOverloads constructor(
     @Suppress("SpreadOperator")
     private fun tryUp() {
         try {
-            val elapsed = measureTimeMillis { allOf(*start(systems.entries))[config.upTimeout, SECONDS] }
-            logger.info(summary(), elapsed)
+            val futures = start(systems.entries)
+            val elapsed = measureTimeMillis {
+                allOf(*futures)[config.upTimeout, SECONDS]
+            }
+            logger.info(summary(futures.associate { it.get() }), elapsed)
         } catch (e: TimeoutException) {
             logger.error("Startup timeout exceeded: expected ${config.upTimeout}s. ${status()}", e)
             throw StartupFail(e)
@@ -59,7 +63,17 @@ open class Environment @JvmOverloads constructor(
     @Suppress("SpreadOperator")
     fun down() {
         if (config.startEnv) {
-            allOf(*systems.values.map { runAsync { it.stop() } }.toTypedArray())[config.downTimeout, SECONDS]
+            allOf(
+                *systems.map {
+                    runAsync {
+                        try {
+                            it.value.stop()
+                        } catch (expected: Throwable) {
+                            logger.error("Failed to stop ${it.key}", expected)
+                        }
+                    }
+                }.toTypedArray()
+            )[config.downTimeout, SECONDS]
         }
     }
 
@@ -82,18 +96,25 @@ open class Environment @JvmOverloads constructor(
     fun status() =
         "Status:\n${systems.entries.joinToString("\n") { "${it.key}: ${if (it.value.running()) "up" else "down"}" }}"
 
-    private fun summary() = "${javaClass.simpleName}\n\n ======= Test environment started {} ms =======\n\n" +
-        systems.entries.joinToString("\n") { "${it.key}: ${it.value.describe()}" } +
-        "\n\n ==============================================\n\n"
+    private fun summary(sysUpTime: Map<String, Long>) =
+        "${javaClass.simpleName}\n\n ======= Test environment started {} ms =======\n\n" +
+            systems.entries.joinToString("\n") { "${it.key} [${sysUpTime[it.key]} ms]: ${it.value.describe()}" } +
+            "\n\n ==================================================\n\n"
 
     @Suppress("UNCHECKED_CAST")
     fun <T : ExternalSystem> find(name: String): T = (systems[name] ?: error("System $name not found")) as T
 
     companion object : KLogging() {
-        private fun start(systems: Set<Map.Entry<String, ExternalSystem>>): Array<CompletableFuture<*>> = systems
-            .onEach { logger.info("Preparing to start {}", it.key) }
-            .map { runAsync({ it.value.start() }, newCachedThreadPool(NamedThreadFactory(it.key))) }
-            .toTypedArray()
+        private fun start(systems: Set<Map.Entry<String, ExternalSystem>>): Array<CompletableFuture<Pair<String, Long>>> =
+            systems
+                .onEach { logger.info("Preparing to start {}", it.key) }
+                .map {
+                    supplyAsync(
+                        { it.key to measureTimeMillis { it.value.start() } },
+                        newCachedThreadPool(NamedThreadFactory(it.key))
+                    )
+                }
+                .toTypedArray()
 
         @JvmStatic
         fun findAvailableTcpPort(): Int = SocketUtils.findAvailableTcpPort()
