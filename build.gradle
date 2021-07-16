@@ -1,7 +1,7 @@
 buildscript {
     ext.kotlin_version = '1.5.21'
     ext.testContainers_version = '1.15.3'
-    ext.wiremock_version = '2.29.0'
+    ext.wiremock_version = '2.27.2'
     ext.klogging_version = '2.0.10'
     ext.libVersion = "3.2.0"
     ext.libGroup = 'io.github.adven27'
