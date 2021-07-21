@@ -3,8 +3,6 @@ package io.github.adven27.env.db.postgresql
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,8 +10,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("LongParameterList")
 class PostgreSqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
-    fixedPort: Int = POSTGRESQL_PORT,
+    private val defaultPort: Int = POSTGRESQL_PORT,
     private var config: Config = Config(),
     private val afterStart: PostgreSqlContainerSystem.() -> Unit = { }
 ) : PostgreSQLContainer<Nothing>(dockerImageName), ExternalSystem {
@@ -24,10 +21,11 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
         afterStart = afterStart
     )
 
-    init {
-        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
-            addFixedExposedPort(fixedPort, POSTGRESQL_PORT)
+    override fun start(fixedEnv: Boolean) {
+        if (fixedEnv) {
+            addFixedExposedPort(defaultPort, POSTGRESQL_PORT)
         }
+        start()
     }
 
     override fun start() {
@@ -37,9 +35,7 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-
     override fun config() = config
-
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(

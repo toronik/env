@@ -5,8 +5,6 @@ import com.ibm.msg.client.wmq.WMQConstants.WMQ_CM_CLIENT
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
@@ -19,9 +17,8 @@ import javax.jms.Session.AUTO_ACKNOWLEDGE
 @Suppress("unused", "MagicNumber")
 class IbmMQContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
-    fixedPort: Int = PORT,
-    fixedPortAdm: Int = PORT_ADM,
+    private val defaultPort: Int = PORT,
+    private val defaultPortAdm: Int = PORT_ADM,
     private var config: IbmMqConfig = IbmMqConfig(),
     private val afterStart: IbmMQContainerSystem.() -> Unit = { },
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
@@ -32,7 +29,7 @@ class IbmMQContainerSystem @JvmOverloads constructor(
         afterStart = afterStart
     )
 
-    init {
+    override fun start(fixedEnv: Boolean) {
         withEnv("MQ_QMGR_NAME", "QM1")
         withEnv("LICENSE", "accept")
         withExposedPorts(PORT, PORT_ADM)
@@ -40,10 +37,11 @@ class IbmMQContainerSystem @JvmOverloads constructor(
             forLogMessage(".*The queue manager task 'AUTOCONFIG' has ended.*", 1).withStartupTimeout(ofSeconds(120))
         )
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("IBMMQ"))
-        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
-            addFixedExposedPort(fixedPort, PORT)
-            addFixedExposedPort(fixedPortAdm, PORT_ADM)
+        if (fixedEnv) {
+            addFixedExposedPort(defaultPort, PORT)
+            addFixedExposedPort(defaultPortAdm, PORT_ADM)
         }
+        start()
     }
 
     override fun start() {
@@ -53,9 +51,7 @@ class IbmMQContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-
     override fun config() = config
-
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     companion object : KLogging() {

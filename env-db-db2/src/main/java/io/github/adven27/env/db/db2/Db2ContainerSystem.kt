@@ -2,24 +2,23 @@ package io.github.adven27.env.db.db2
 
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
 import org.testcontainers.containers.Db2Container
 import org.testcontainers.utility.DockerImageName
 
 @Suppress("unused", "LongParameterList")
 class Db2ContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName,
-    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = FixedDynamicEnvironmentStrategy.SystemPropertyToggle(),
-    fixedPort: Int = DB2_PORT,
+    private val defaultPort: Int = DB2_PORT,
     private var config: Config = Config(),
     private val afterStart: Db2ContainerSystem.() -> Unit = { }
 ) : Db2Container(dockerImageName), ExternalSystem {
 
-    init {
+    override fun start(fixedEnv: Boolean) {
         acceptLicense()
-        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
-            addFixedExposedPort(fixedPort, DB2_PORT)
+        if (fixedEnv) {
+            addFixedExposedPort(defaultPort, DB2_PORT)
         }
+        start()
     }
 
     override fun start() {
@@ -29,9 +28,7 @@ class Db2ContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-
     override fun config() = config
-
     override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(

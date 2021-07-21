@@ -6,31 +6,42 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import io.github.adven27.env.core.Environment.Companion.findAvailableTcpPort
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import io.github.adven27.env.core.GenericExternalSystem
 import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.DEFAULT_PORT
 import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.PROP_PORT
 import wiremock.com.github.jknack.handlebars.Helper
+import java.util.concurrent.atomic.AtomicReference
 
 open class WiremockSystem @JvmOverloads constructor(
-    private val server: WireMockServer,
+    private val wireMockConfiguration: WireMockConfiguration,
+    private val defaultPort: Int = DEFAULT_PORT,
     afterStart: WireMockServer.() -> Unit = { }
-) : GenericExternalSystem<WireMockServer>(
-    system = server,
-    start = { it.start(); it.afterStart() },
-    stop = { it.stop() },
-    running = { it.isRunning }
+) : GenericExternalSystem<AtomicReference<WireMockServer?>, WiremockSystem.Config>(
+    system = AtomicReference<WireMockServer?>(),
+    config = Config(),
+    start = { fixedEnv, system ->
+        system.set(
+            WireMockServer(
+                wireMockConfiguration.port(
+                    if (fixedEnv) defaultPort else findAvailableTcpPort().apply {
+                        mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
+                    }
+                )
+            )
+        )
+        with(system.get()!!) {
+            start()
+            afterStart()
+            Config(port())
+        }
+    },
+    stop = { it.get()?.stop() },
+    running = { it.get()?.isRunning == true }
 ) {
-    @Suppress("unused")
-    constructor(afterStart: WireMockServer.() -> Unit) : this(afterStart = afterStart, fixedPort = 8888)
+    private lateinit var server: WireMockServer
 
     @Suppress("unused")
-    @JvmOverloads
-    constructor(
-        wireMockConfiguration: WireMockConfiguration,
-        afterStart: WireMockServer.() -> Unit = { }
-    ) : this(server = WireMockServer(wireMockConfiguration), afterStart = afterStart)
+    constructor(afterStart: WireMockServer.() -> Unit) : this(afterStart = afterStart, fixedPort = DEFAULT_PORT)
 
     @Suppress("unused")
     @JvmOverloads
@@ -39,34 +50,27 @@ open class WiremockSystem @JvmOverloads constructor(
         afterStart: WireMockServer.() -> Unit = { },
         additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration = { this },
         fixedPort: Int = DEFAULT_PORT,
-        fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle()
     ) : this(
-        server = WireMockServer(
-            additionalConfiguration.invoke(
-                wireMockConfig()
-                    .usingFilesUnderClasspath("wiremock")
-                    .extensions(ResponseTemplateTransformer(true, helpers))
-                    .port(
-                        port(fixedDynamicEnvironmentStrategy, fixedPort).apply {
-                            mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
-                        }
-                    )
-            )
+        wireMockConfiguration = additionalConfiguration.invoke(
+            wireMockConfig()
+                .usingFilesUnderClasspath("wiremock")
+                .extensions(ResponseTemplateTransformer(true, helpers))
+
         ),
+        defaultPort = fixedPort,
         afterStart = afterStart
     )
 
     @Suppress("unused")
     constructor(
         additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration,
-        afterStart: WireMockServer.() -> Unit = { },
-    ) : this(mapOf(), afterStart, additionalConfiguration, DEFAULT_PORT, SystemPropertyToggle())
+        afterStart: WireMockServer.() -> Unit = { }
+    ) : this(mapOf(), afterStart, additionalConfiguration, DEFAULT_PORT)
 
-    override fun describe() =
-        "${system.baseUrl()} registered ${system.listAllStubMappings().mappings.size} mappings. \n\t" +
+    override fun describe() = with(system.get()) {
+        "${this?.baseUrl()} registered ${this?.listAllStubMappings()?.mappings?.size} mappings. \n\t" +
             config().asMap().entries.joinToString("\n\t") { it.toString() }
-
-    override fun config(): Config = Config(server.port())
+    }
 
     data class Config(val port: Int = DEFAULT_PORT) {
         companion object {
@@ -75,10 +79,5 @@ open class WiremockSystem @JvmOverloads constructor(
         }
 
         fun asMap() = mapOf(PROP_PORT to port)
-    }
-
-    companion object {
-        private fun port(strategy: FixedDynamicEnvironmentStrategy, fixedPort: Int) =
-            if (strategy.fixedEnv()) fixedPort else findAvailableTcpPort()
     }
 }

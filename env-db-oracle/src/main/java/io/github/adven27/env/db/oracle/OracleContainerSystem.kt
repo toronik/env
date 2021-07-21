@@ -3,8 +3,6 @@ package io.github.adven27.env.db.oracle
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.OracleContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,8 +10,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("LongParameterList")
 class OracleContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
-    fixedPort: Int = PORT,
+    private val defaultPort: Int = PORT,
     private var config: Config = Config(),
     private val afterStart: OracleContainerSystem.() -> Unit = { }
 ) : OracleContainer(dockerImageName), ExternalSystem {
@@ -24,12 +21,13 @@ class OracleContainerSystem @JvmOverloads constructor(
         afterStart = afterStart
     )
 
-    init {
-        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
-            addFixedExposedPort(fixedPort, PORT)
+    override fun start(fixedEnv: Boolean) {
+        if (fixedEnv) {
+            addFixedExposedPort(defaultPort, PORT)
         }
         withEnv("ORACLE_ALLOW_REMOTE", "true")
         withEnv("ORACLE_DISABLE_ASYNCH_IO", "true")
+        start()
     }
 
     override fun start() {

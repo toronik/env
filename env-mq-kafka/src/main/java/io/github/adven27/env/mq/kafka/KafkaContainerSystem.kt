@@ -3,8 +3,6 @@ package io.github.adven27.env.mq.kafka
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG
@@ -15,8 +13,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("unused")
 open class KafkaContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
-    fixedPort: Int = KAFKA_PORT,
+    private val defaultPort: Int = KAFKA_PORT,
     private var config: Config = Config(),
     private val topicNameAndPartitionCount: Map<String, Int> = mapOf(),
     private val afterStart: KafkaContainerSystem.() -> Unit = { }
@@ -45,10 +42,11 @@ open class KafkaContainerSystem @JvmOverloads constructor(
         afterStart = afterStart
     )
 
-    init {
-        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
-            addFixedExposedPort(fixedPort, KAFKA_PORT)
+    override fun start(fixedEnv: Boolean) {
+        if (fixedEnv) {
+            addFixedExposedPort(defaultPort, KAFKA_PORT)
         }
+        start()
     }
 
     override fun start() {

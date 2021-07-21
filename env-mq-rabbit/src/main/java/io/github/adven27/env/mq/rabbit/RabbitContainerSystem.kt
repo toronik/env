@@ -3,8 +3,6 @@ package io.github.adven27.env.mq.rabbit
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.RabbitMQContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,9 +10,8 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("unused")
 open class RabbitContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
-    fixedPort: Int = PORT,
-    fixedPortAdm: Int = PORT_ADM,
+    private val defaultPort: Int = PORT,
+    private val defaultPortAdm: Int = PORT_ADM,
     private var config: Config = Config(),
     private val afterStart: RabbitContainerSystem.() -> Unit = { }
 ) : RabbitMQContainer(dockerImageName), ExternalSystem {
@@ -25,11 +22,12 @@ open class RabbitContainerSystem @JvmOverloads constructor(
         afterStart = afterStart
     )
 
-    init {
-        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
-            addFixedExposedPort(fixedPort, PORT)
-            addFixedExposedPort(fixedPortAdm, PORT_ADM)
+    override fun start(fixedEnv: Boolean) {
+        if (fixedEnv) {
+            addFixedExposedPort(defaultPort, PORT)
+            addFixedExposedPort(defaultPortAdm, PORT_ADM)
         }
+        start()
     }
 
     override fun start() {

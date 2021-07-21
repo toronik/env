@@ -1,48 +1,42 @@
 package io.github.adven27.env.mq.kafka.embedded
 
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
-import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
+import io.github.adven27.env.core.GenericExternalSystem
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 
 @Suppress("unused")
-open class EmbeddedKafkaSystem(private val embeddedKafka: EmbeddedKafkaBroker) : ExternalSystem {
+open class EmbeddedKafkaSystem(
+    private val embeddedKafka: EmbeddedKafkaBroker,
+    defaultPort: Int = DEFAULT_KAFKA_PORT,
+) : GenericExternalSystem<EmbeddedKafkaBroker, EmbeddedKafkaSystem.Config>(
+    system = embeddedKafka,
+    config = Config(),
+    start = { fixedEnv, system ->
+        if (fixedEnv) system.kafkaPorts(defaultPort)
+        system.afterPropertiesSet()
+        Config(system.brokersAsString)
+    },
+    stop = { embeddedKafka.destroy() },
+    running = { System.getProperty(EmbeddedKafkaBroker.SPRING_EMBEDDED_ZOOKEEPER_CONNECT) != null }
+) {
 
     @Suppress("SpreadOperator")
     @JvmOverloads
     constructor(
         topics: Array<String>,
-        fixedPort: Int = DEFAULT_KAFKA_PORT,
-        fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
+        defaultPort: Int = DEFAULT_KAFKA_PORT,
     ) : this(
         EmbeddedKafkaBroker(
             NUMBER_OF_BROKERS,
             CONTROLLED_SHUTDOWN,
             NUMBER_OF_PARTITIONS,
             *topics
-        ).apply {
-            if (fixedDynamicEnvironmentStrategy.fixedEnv()) kafkaPorts(fixedPort)
-        }
+        ),
+        defaultPort
     )
 
-    private var config: Config = Config()
-    private var isRunning = false
-
-    override fun start() {
-        embeddedKafka.afterPropertiesSet()
-        config = Config(embeddedKafka.brokersAsString)
-        isRunning = true
-    }
-
-    override fun stop() {
-        embeddedKafka.destroy()
-        isRunning = false
-    }
-
-    override fun running() = isRunning
-    override fun config(): Config = config
-    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
+    override fun describe() =
+        super.describe() + "\n\t" + config().asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$DEFAULT_KAFKA_PORT") {
         init {

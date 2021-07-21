@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+apply from: "$rootDir/gradle/publish.gradle"
+
+dependencies {
+    api project(':env-core')
+    runtimeOnly("com.oracle.database.jdbc:ojdbc11:21.1.0.0")
+    implementation("org.springframework:spring-jdbc:5.3.9")
+}

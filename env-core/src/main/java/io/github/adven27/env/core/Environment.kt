@@ -45,7 +45,7 @@ open class Environment @JvmOverloads constructor(
     @Suppress("SpreadOperator")
     private fun tryUp() {
         try {
-            val futures = start(systems.entries)
+            val futures = start(systems.entries, config.envStrategy.fixedEnv())
             val elapsed = measureTimeMillis {
                 allOf(*futures)[config.upTimeout, SECONDS]
             }
@@ -57,7 +57,7 @@ open class Environment @JvmOverloads constructor(
     }
 
     fun up(vararg systems: String) {
-        exec(systems, "Starting {}...", config.upTimeout) { it.start() }
+        exec(systems, "Starting {}...", config.upTimeout) { it.start(config.envStrategy.fixedEnv()) }
     }
 
     @Suppress("SpreadOperator")
@@ -85,7 +85,7 @@ open class Environment @JvmOverloads constructor(
     private fun exec(systems: Array<out String>, logDesc: String, timeout: Long, operation: (ExternalSystem) -> Unit) {
         allOf(
             *this.systems.entries
-                .filter { systems.any { s: String -> it.key.toLowerCase().startsWith(s.toLowerCase()) } }
+                .filter { systems.any { s: String -> it.key.startsWith(s, ignoreCase = true) } }
                 .onEach { logger.info(logDesc, it.key) }
                 .map { it.value }
                 .map { runAsync { operation(it) } }
@@ -105,12 +105,15 @@ open class Environment @JvmOverloads constructor(
     fun <T : ExternalSystem> find(name: String): T = (systems[name] ?: error("System $name not found")) as T
 
     companion object : KLogging() {
-        private fun start(systems: Set<Map.Entry<String, ExternalSystem>>): Array<CompletableFuture<Pair<String, Long>>> =
+        private fun start(
+            systems: Set<Map.Entry<String, ExternalSystem>>,
+            fixedEnv: Boolean
+        ): Array<CompletableFuture<Pair<String, Long>>> =
             systems
                 .onEach { logger.info("Preparing to start {}", it.key) }
                 .map {
                     supplyAsync(
-                        { it.key to measureTimeMillis { it.value.start() } },
+                        { it.key to measureTimeMillis { it.value.start(fixedEnv) } },
                         newCachedThreadPool(NamedThreadFactory(it.key))
                     )
                 }
@@ -136,7 +139,8 @@ open class Environment @JvmOverloads constructor(
     data class Config @JvmOverloads constructor(
         val downTimeout: Long = FromSystemProperty().resolve().downTimeout,
         val upTimeout: Long = FromSystemProperty().resolve().upTimeout,
-        val startEnv: Boolean = FromSystemProperty().resolve().startEnv
+        val startEnv: Boolean = FromSystemProperty().resolve().startEnv,
+        val envStrategy: EnvironmentStrategy = EnvironmentStrategy.SystemPropertyToggle(),
     )
 
     interface ConfigResolver {

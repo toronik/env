@@ -3,8 +3,6 @@ package io.github.adven27.env.db.mysql
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy
-import io.github.adven27.env.core.FixedDynamicEnvironmentStrategy.SystemPropertyToggle
 import mu.KLogging
 import org.testcontainers.containers.MySQLContainer
 import org.testcontainers.utility.DockerImageName
@@ -12,8 +10,7 @@ import org.testcontainers.utility.DockerImageName
 @Suppress("LongParameterList")
 class MySqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
-    fixedDynamicEnvironmentStrategy: FixedDynamicEnvironmentStrategy = SystemPropertyToggle(),
-    fixedPort: Int = MYSQL_PORT,
+    private val defaultPort: Int = MYSQL_PORT,
     private var config: Config = Config(),
     private val afterStart: MySqlContainerSystem.() -> Unit = { }
 ) : MySQLContainer<Nothing>(dockerImageName), ExternalSystem {
@@ -24,16 +21,17 @@ class MySqlContainerSystem @JvmOverloads constructor(
         afterStart = afterStart
     )
 
-    init {
-        if (fixedDynamicEnvironmentStrategy.fixedEnv()) {
-            addFixedExposedPort(fixedPort, MYSQL_PORT)
-        }
-    }
-
     override fun start() {
         super.start()
         config = Config(jdbcUrl, username, password, driverClassName)
         apply(afterStart)
+    }
+
+    override fun start(fixedEnv: Boolean) {
+        if (fixedEnv) {
+            addFixedExposedPort(defaultPort, MYSQL_PORT)
+        }
+        start()
     }
 
     override fun running() = isRunning
