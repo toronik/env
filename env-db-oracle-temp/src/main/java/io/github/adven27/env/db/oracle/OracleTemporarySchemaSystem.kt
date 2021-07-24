@@ -1,7 +1,7 @@
 package io.github.adven27.env.db.oracle
 
-import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.ExternalSystemConfig
 import mu.KLogging
 import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.core.io.support.EncodedResource
@@ -79,15 +79,13 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
     override fun config() = config
-    override fun describe() =
-        super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
         val url: String = "jdbc:oracle:thin:@host:port:sid",
         val username: String = "test",
         val password: String = "test",
         val driver: String = "oracle.jdbc.OracleDriver"
-    ) {
+    ) : ExternalSystemConfig(PROP_URL to url, PROP_USER to username, PROP_PASSWORD to password, PROP_DRIVER to driver) {
         companion object {
             private const val PREFIX = "env.db.oracle."
             const val PROP_URL = "${PREFIX}url"
@@ -95,13 +93,6 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
             const val PROP_PASSWORD = "${PREFIX}password"
             const val PROP_DRIVER = "${PREFIX}driver"
         }
-
-        init {
-            asMap().propagateToSystemProperties()
-        }
-
-        fun asMap() =
-            mapOf(PROP_URL to url, PROP_USER to username, PROP_PASSWORD to password, PROP_DRIVER to driver)
     }
 
     private var isRunning = false
@@ -114,9 +105,7 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
     fun getUsername() = config.username
     fun getPassword() = config.password
 
-    override fun close() {
-        stop()
-    }
+    override fun close() = stop()
 
     fun withInitScript(initScriptPath: String): OracleTemporarySchemaSystem {
         this.initScriptPath = initScriptPath

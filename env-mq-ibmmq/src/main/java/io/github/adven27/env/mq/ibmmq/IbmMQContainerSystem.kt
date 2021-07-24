@@ -3,8 +3,8 @@ package io.github.adven27.env.mq.ibmmq
 import com.ibm.mq.jms.MQConnectionFactory
 import com.ibm.msg.client.wmq.WMQConstants.WMQ_CM_CLIENT
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.ExternalSystemConfig
 import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
@@ -15,7 +15,7 @@ import javax.jms.Session
 import javax.jms.Session.AUTO_ACKNOWLEDGE
 
 @Suppress("unused", "MagicNumber")
-class IbmMQContainerSystem @JvmOverloads constructor(
+open class IbmMQContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
     private val defaultPortAdm: Int = PORT_ADM,
@@ -52,7 +52,6 @@ class IbmMQContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
     override fun config() = config
-    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     companion object : KLogging() {
         private const val PORT = 1414
@@ -111,6 +110,14 @@ data class IbmMqConfig @JvmOverloads constructor(
     val devQueue1: String = "DEV.QUEUE.1",
     val devQueue2: String = "DEV.QUEUE.2",
     val devQueue3: String = "DEV.QUEUE.3",
+) : ExternalSystemConfig(
+    PROP_HOST to host,
+    PROP_PORT to port.toString(),
+    PROP_MANAGER to manager,
+    PROP_CHANNEL to channel,
+    PROP_DEV_Q1 to devQueue1,
+    PROP_DEV_Q2 to devQueue2,
+    PROP_DEV_Q3 to devQueue3
 ) {
     @Suppress("unused")
     val jmsTester1 = jmsConfig(devQueue1)
@@ -122,20 +129,6 @@ data class IbmMqConfig @JvmOverloads constructor(
     val jmsTester3 = jmsConfig(devQueue3)
 
     private fun jmsConfig(q: String) = Config(host, port.toInt(), q, manager, channel)
-
-    init {
-        asMap().propagateToSystemProperties()
-    }
-
-    fun asMap(): Map<String, String> = mapOf(
-        PROP_HOST to host,
-        PROP_PORT to port.toString(),
-        PROP_MANAGER to manager,
-        PROP_CHANNEL to channel,
-        PROP_DEV_Q1 to devQueue1,
-        PROP_DEV_Q2 to devQueue2,
-        PROP_DEV_Q3 to devQueue3
-    )
 
     data class Config(val host: String, val port: Int, val queue: String, val manager: String, val channel: String)
 

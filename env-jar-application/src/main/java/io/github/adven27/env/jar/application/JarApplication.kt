@@ -2,6 +2,7 @@ package io.github.adven27.env.jar.application
 
 import io.github.adven27.env.core.Environment.Companion.findAvailableTcpPort
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.jar.application.WaitingStrategy.HealthCheckUrl
 import mu.KLogging
 import java.io.File
@@ -65,7 +66,10 @@ abstract class JarApplication @JvmOverloads constructor(
         }
     }
 
-    data class Config(val args: Array<String> = arrayOf(), val systemProperties: Array<String> = arrayOf()) {
+    class Config(
+        val args: Array<String> = arrayOf(),
+        val systemProperties: Array<String> = arrayOf()
+    ) : ExternalSystemConfig() {
         fun addArgs(vararg args: String) = Config(this.args + arrayOf(*args), this.systemProperties)
         fun addSystemProperties(vararg properties: String) =
             Config(this.args, this.systemProperties + arrayOf(*properties))
@@ -78,7 +82,7 @@ abstract class JarApplication @JvmOverloads constructor(
 }
 
 @Suppress("unused")
-class JarTask @JvmOverloads constructor(
+open class JarTask @JvmOverloads constructor(
     jar: File,
     config: Config,
     configureBeforeStart: (fixedEnv: Boolean, config: Config) -> Config = { _, cfg -> cfg },
@@ -90,7 +94,7 @@ class JarTask @JvmOverloads constructor(
 }
 
 @Suppress("LongParameterList", "unused")
-class JarWebService @JvmOverloads constructor(
+open class JarWebService @JvmOverloads constructor(
     jar: File,
     private val defaultPort: Int,
     config: Config,

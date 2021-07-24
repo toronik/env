@@ -1,8 +1,8 @@
 package io.github.adven27.env.mq.rabbit
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.ExternalSystemConfig
 import mu.KLogging
 import org.testcontainers.containers.RabbitMQContainer
 import org.testcontainers.utility.DockerImageName
@@ -38,18 +38,11 @@ open class RabbitContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
     override fun config(): Config = config
-    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config constructor(
         val host: String = "localhost",
         val port: Int = PORT
-    ) {
-        init {
-            asMap().propagateToSystemProperties()
-        }
-
-        fun asMap() = mapOf(PROP_HOST to host, PROP_PORT to port.toString())
-
+    ) : ExternalSystemConfig(PROP_HOST to host, PROP_PORT to port.toString()) {
         companion object {
             const val PROP_HOST = "env.mq.rabbit.host"
             const val PROP_PORT = "env.mq.rabbit.port"

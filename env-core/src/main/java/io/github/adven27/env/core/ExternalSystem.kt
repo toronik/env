@@ -1,5 +1,6 @@
 package io.github.adven27.env.core
 
+import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import java.util.function.BiFunction
 import java.util.function.Consumer
 import java.util.function.Function
@@ -11,11 +12,12 @@ interface ExternalSystem {
     fun start(fixedEnv: Boolean)
     fun stop()
     fun running(): Boolean
-    fun config(): Any
-    fun describe(): String = toString()
+    fun config(): ExternalSystemConfig
+    fun describe(): String =
+        toString() + config().properties.entries.joinToString(separator = "\n\t", prefix = "\n\t") { it.toString() }
 }
 
-open class GenericExternalSystem<T, C : Any> @JvmOverloads constructor(
+open class GenericExternalSystem<T, C : ExternalSystemConfig> @JvmOverloads constructor(
     protected var system: T,
     private var config: C,
     private val start: BiFunction<Boolean, T, C>,
@@ -45,5 +47,13 @@ interface EnvironmentStrategy {
         private val orElse: Boolean = false
     ) : EnvironmentStrategy {
         override fun fixedEnv(): Boolean = System.getProperty(property, orElse.toString()).toBoolean()
+    }
+}
+
+open class ExternalSystemConfig(val properties: Map<String, String>) {
+    constructor(vararg properties: Pair<String, String>) : this(properties.toMap())
+
+    init {
+        properties.propagateToSystemProperties()
     }
 }

@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import io.github.adven27.env.core.Environment.Companion.findAvailableTcpPort
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
+import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.core.GenericExternalSystem
 import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.DEFAULT_PORT
 import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.PROP_PORT
@@ -69,15 +70,13 @@ open class WiremockSystem @JvmOverloads constructor(
 
     override fun describe() = with(system.get()) {
         "${this?.baseUrl()} registered ${this?.listAllStubMappings()?.mappings?.size} mappings. \n\t" +
-            config().asMap().entries.joinToString("\n\t") { it.toString() }
+            config().properties.entries.joinToString("\n\t") { it.toString() }
     }
 
-    data class Config(val port: Int = DEFAULT_PORT) {
+    data class Config(val port: Int = DEFAULT_PORT) : ExternalSystemConfig(PROP_PORT to port.toString()) {
         companion object {
             const val PROP_PORT = "env.wiremock.port"
             const val DEFAULT_PORT = 8888
         }
-
-        fun asMap() = mapOf(PROP_PORT to port)
     }
 }

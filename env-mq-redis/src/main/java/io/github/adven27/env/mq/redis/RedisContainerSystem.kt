@@ -1,14 +1,14 @@
 package io.github.adven27.env.mq.redis
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.ExternalSystemConfig
 import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration.ofSeconds
 
-class RedisContainerSystem @JvmOverloads constructor(
+open class RedisContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
     private var config: Config = Config(),
@@ -38,18 +38,9 @@ class RedisContainerSystem @JvmOverloads constructor(
 
     override fun config() = config
     override fun running() = isRunning
-    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
-    data class Config @JvmOverloads constructor(
-        val host: String = "localhost",
-        val port: Int = PORT
-    ) {
-        init {
-            asMap().propagateToSystemProperties()
-        }
-
-        fun asMap() = mapOf("env.mq.redis.host" to host, "env.mq.redis.port" to port.toString())
-    }
+    data class Config @JvmOverloads constructor(val host: String = "localhost", val port: Int = PORT) :
+        ExternalSystemConfig("env.mq.redis.host" to host, "env.mq.redis.port" to port.toString())
 
     companion object : KLogging() {
         private const val PORT = 6379

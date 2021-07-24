@@ -1,14 +1,14 @@
 package io.github.adven27.env.db.postgresql
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.ExternalSystemConfig
 import mu.KLogging
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
-@Suppress("LongParameterList")
-class PostgreSqlContainerSystem @JvmOverloads constructor(
+@Suppress("LongParameterList", "unused")
+open class PostgreSqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = POSTGRESQL_PORT,
     private var config: Config = Config(),
@@ -36,13 +36,17 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
     override fun config() = config
-    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     data class Config @JvmOverloads constructor(
         val jdbcUrl: String = "jdbc:postgresql://localhost:$POSTGRESQL_PORT/postgres?stringtype=unspecified",
         val username: String = "test",
         val password: String = "test",
         val driver: String = "org.postgresql.Driver"
+    ) : ExternalSystemConfig(
+        PROP_URL to jdbcUrl,
+        PROP_USER to username,
+        PROP_PASSWORD to password,
+        PROP_DRIVER to driver
     ) {
         companion object {
             private const val PREFIX = "env.db.postgresql."
@@ -51,13 +55,6 @@ class PostgreSqlContainerSystem @JvmOverloads constructor(
             const val PROP_PASSWORD = "${PREFIX}password"
             const val PROP_DRIVER = "${PREFIX}driver"
         }
-
-        init {
-            asMap().propagateToSystemProperties()
-        }
-
-        fun asMap() =
-            mapOf(PROP_URL to jdbcUrl, PROP_USER to username, PROP_PASSWORD to password, PROP_DRIVER to driver)
     }
 
     companion object : KLogging() {

@@ -1,6 +1,7 @@
 package io.github.adven27.env.grpc;
 
 import io.github.adven27.env.core.ExternalSystem;
+import io.github.adven27.env.core.ExternalSystemConfig;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.utility.MountableFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -85,28 +87,33 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
 
     @NotNull
     @Override
-    public String describe() {
-        return toString();
+    public ExternalSystemConfig config() {
+        return new Config(port(), mockPort());
     }
 
     @NotNull
     @Override
-    public Object config() {
-        return new Config(port(), mockPort());
+    public String describe() {
+        return ExternalSystem.super.describe();
     }
 
-    public static class Config {
+    public static class Config extends ExternalSystemConfig {
+        public static String PROP_GRPC_PORT = "env.grpc.port";
+        public static String PROP_GRPC_MOCK_PORT = "env.grpc.mock.port";
         private final Integer grpcPort;
         private final Integer mockPort;
 
         public Config(int grpcPort, int mockPort) {
+            super(new HashMap<String, String>() {{
+                put(PROP_GRPC_PORT, String.valueOf(grpcPort));
+                put(PROP_GRPC_MOCK_PORT, String.valueOf(mockPort));
+            }});
             this.grpcPort = grpcPort;
             this.mockPort = mockPort;
         }
 
         public Config() {
-            this.grpcPort = 50000;
-            this.mockPort = 8888;
+            this(50000, 8888);
         }
 
         public int getGrpcPort() {

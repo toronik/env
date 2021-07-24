@@ -1,8 +1,8 @@
 package io.github.adven27.env.mq.kafka
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystem
+import io.github.adven27.env.core.ExternalSystemConfig
 import mu.KLogging
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG
@@ -58,7 +58,6 @@ open class KafkaContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
     override fun config(): Config = config
-    override fun describe() = super.describe() + "\n\t" + config.asMap().entries.joinToString("\n\t") { it.toString() }
 
     private fun createTopics(topicNameAndPartitionCount: Map<String, Int>) =
         AdminClient.create(mapOf(BOOTSTRAP_SERVERS_CONFIG to config.bootstrapServers)).use { admin ->
@@ -67,13 +66,9 @@ open class KafkaContainerSystem @JvmOverloads constructor(
             )
         }
 
-    data class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$KAFKA_PORT") {
-        init {
-            asMap().propagateToSystemProperties()
-        }
-
-        fun asMap() = mapOf(PROP_BOOTSTRAPSERVERS to bootstrapServers)
-
+    data class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$KAFKA_PORT") : ExternalSystemConfig(
+        PROP_BOOTSTRAPSERVERS to bootstrapServers
+    ) {
         companion object {
             const val PROP_BOOTSTRAPSERVERS = "env.mq.kafka.bootstrapServers"
         }

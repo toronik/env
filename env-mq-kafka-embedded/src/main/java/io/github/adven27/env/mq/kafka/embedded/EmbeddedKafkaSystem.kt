@@ -1,6 +1,6 @@
 package io.github.adven27.env.mq.kafka.embedded
 
-import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
+import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.core.GenericExternalSystem
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 
@@ -35,16 +35,8 @@ open class EmbeddedKafkaSystem(
         defaultPort
     )
 
-    override fun describe() =
-        super.describe() + "\n\t" + config().asMap().entries.joinToString("\n\t") { it.toString() }
-
-    data class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$DEFAULT_KAFKA_PORT") {
-        init {
-            asMap().propagateToSystemProperties()
-        }
-
-        fun asMap() = mapOf(PROP_BOOTSTRAPSERVERS to bootstrapServers)
-
+    data class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$DEFAULT_KAFKA_PORT") :
+        ExternalSystemConfig(PROP_BOOTSTRAPSERVERS to bootstrapServers) {
         companion object {
             const val PROP_BOOTSTRAPSERVERS = "env.mq.kafka.bootstrapServers"
         }
