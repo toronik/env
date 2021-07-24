@@ -94,7 +94,7 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
     @NotNull
     @Override
     public String describe() {
-        return ExternalSystem.super.describe();
+        return toString();
     }
 
     public static class Config extends ExternalSystemConfig {
