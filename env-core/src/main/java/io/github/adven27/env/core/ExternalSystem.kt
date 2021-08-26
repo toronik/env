@@ -35,7 +35,6 @@ open class GenericExternalSystem<T, C : ExternalSystemConfig> @JvmOverloads cons
     }
 
     override fun running(): Boolean = running.apply(system)
-    override fun describe() = system.toString()
     override fun config() = config
 }
 

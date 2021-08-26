@@ -35,7 +35,9 @@ open class EmbeddedKafkaSystem(
         defaultPort
     )
 
-    data class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$DEFAULT_KAFKA_PORT") :
+    override fun toString() = "Embedded Kafka Broker"
+
+    open class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$DEFAULT_KAFKA_PORT") :
         ExternalSystemConfig(PROP_BOOTSTRAPSERVERS to bootstrapServers) {
         companion object {
             const val PROP_BOOTSTRAPSERVERS = "env.mq.kafka.bootstrapServers"

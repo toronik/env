@@ -9,18 +9,18 @@ Java library for a microservice environment emulation
 1. Add needed dependencies:
 
 ```groovy
-testImplementation "io.github.adven27:env-db-postgresql:4.0.1"
-testImplementation "io.github.adven27:env-db-mssql:4.0.1"
-testImplementation "io.github.adven27:env-db-mysql:4.0.1"
-testImplementation "io.github.adven27:env-db-oracle:4.0.1"
-testImplementation "io.github.adven27:env-db-oracle-temp:4.0.1"
-testImplementation "io.github.adven27:env-db-db2:4.0.1"
-testImplementation "io.github.adven27:env-jar-application:4.0.1"
-testImplementation "io.github.adven27:env-mq-rabbit:4.0.1"
-testImplementation "io.github.adven27:env-mq-ibmmq:4.0.1"
-testImplementation "io.github.adven27:env-mq-redis:4.0.1"
-testImplementation "io.github.adven27:env-grpc-mock:4.0.1"
-testImplementation "io.github.adven27:env-wiremock:4.0.1"
+testImplementation "io.github.adven27:env-db-postgresql:4.0.2"
+testImplementation "io.github.adven27:env-db-mssql:4.0.2"
+testImplementation "io.github.adven27:env-db-mysql:4.0.2"
+testImplementation "io.github.adven27:env-db-oracle:4.0.2"
+testImplementation "io.github.adven27:env-db-oracle-temp:4.0.2"
+testImplementation "io.github.adven27:env-db-db2:4.0.2"
+testImplementation "io.github.adven27:env-jar-application:4.0.2"
+testImplementation "io.github.adven27:env-mq-rabbit:4.0.2"
+testImplementation "io.github.adven27:env-mq-ibmmq:4.0.2"
+testImplementation "io.github.adven27:env-mq-redis:4.0.2"
+testImplementation "io.github.adven27:env-grpc-mock:4.0.2"
+testImplementation "io.github.adven27:env-wiremock:4.0.2"
 ```
 
 2. Set up systems:
