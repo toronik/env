@@ -4,7 +4,7 @@
 
 Java library for a microservice environment emulation.
 
-Approach is conseptually agnostic to tools used for specific external system emulation (e.g. docker, remote server, java standalone app or process) that enables to build up mixed environment consisted of differnetly set upped systems.
+Idea is to be agnostic to tools used for specific external system emulation (e.g. docker, remote server, java standalone app or process). It enables to build up mixed environment consisted of differently set upped systems.
 
 ### How to use
 
