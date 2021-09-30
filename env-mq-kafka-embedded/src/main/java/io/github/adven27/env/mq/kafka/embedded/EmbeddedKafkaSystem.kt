@@ -21,9 +21,9 @@ open class EmbeddedKafkaSystem(
 ) {
 
     @Suppress("SpreadOperator")
-    @JvmOverloads
     constructor(
         topics: Array<String>,
+        properties: MutableMap<String, String> = mutableMapOf(),
         defaultPort: Int = DEFAULT_KAFKA_PORT,
     ) : this(
         EmbeddedKafkaBroker(
@@ -31,9 +31,15 @@ open class EmbeddedKafkaSystem(
             CONTROLLED_SHUTDOWN,
             NUMBER_OF_PARTITIONS,
             *topics
-        ),
+        ).brokerProperties(properties),
         defaultPort
     )
+
+    constructor(topics: Array<String>, properties: MutableMap<String, String> = mutableMapOf()) :
+        this(topics, properties, DEFAULT_KAFKA_PORT)
+
+    @Suppress("SpreadOperator")
+    constructor(vararg topics: String) : this(topics = arrayOf(*topics))
 
     override fun toString() = "Embedded Kafka Broker"
 

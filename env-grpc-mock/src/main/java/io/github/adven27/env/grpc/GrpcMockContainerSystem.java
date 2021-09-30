@@ -50,7 +50,8 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
 
     @Override
     public void start(boolean fixedEnv) {
-        this.withFixedExposedPort(findAndSetBasePort(fixedEnv) + serviceId, 50000)
+        withFixedExposedPort(fixedEnv ? serviceId + 10000 : findAvailableTcpPort(), 50000)
+            .withFixedExposedPort(fixedEnv ? serviceId + 20000 : findAvailableTcpPort(), 8888)
             .waitingFor(forLogMessage(".*Started GrpcWiremock.*\\s", 1))
             .withStartupTimeout(ofSeconds(180))
             .withCreateContainerCmdModifier(cmd -> {
@@ -58,14 +59,7 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
                 cmd.withHostName("grpc-mock-" + serviceId + "-" + random);
                 cmd.withName("grpc-mock-" + serviceId + "-" + random);
             });
-        if (fixedEnv) {
-            withFixedExposedPort(20000 + serviceId, 8888);
-        }
         start();
-    }
-
-    private static int findAndSetBasePort(boolean fixedEnv) {
-        return fixedEnv ? 10000 : findAvailableTcpPort();
     }
 
     private int mockPort() {

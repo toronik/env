@@ -1,6 +1,7 @@
 package io.github.adven27.env.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.Json
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
@@ -43,8 +44,6 @@ open class WiremockSystem @JvmOverloads constructor(
     stop = { it.get()?.stop() },
     running = { it.get()?.isRunning == true }
 ) {
-    private lateinit var server: WireMockServer
-
     @Suppress("unused")
     constructor(afterStart: WireMockServer.() -> Unit) : this(afterStart = afterStart, fixedPort = DEFAULT_PORT)
 
@@ -76,6 +75,8 @@ open class WiremockSystem @JvmOverloads constructor(
         "${this?.baseUrl()} registered ${this?.listAllStubMappings()?.mappings?.size} mappings. \n\t" +
             config().properties.entries.joinToString("\n\t") { it.toString() }
     }
+
+    fun client() = WireMock(config().port)
 
     data class Config(val port: Int = DEFAULT_PORT) : ExternalSystemConfig(PROP_PORT to port.toString()) {
         companion object {

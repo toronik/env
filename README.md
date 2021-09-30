@@ -11,18 +11,18 @@ Idea is to be agnostic to tools used for specific external system emulation (e.g
 1. Add needed dependencies:
 
 ```groovy
-testImplementation "io.github.adven27:env-db-postgresql:4.0.3"
-testImplementation "io.github.adven27:env-db-mssql:4.0.3"
-testImplementation "io.github.adven27:env-db-mysql:4.0.3"
-testImplementation "io.github.adven27:env-db-oracle:4.0.3"
-testImplementation "io.github.adven27:env-db-oracle-temp:4.0.3"
-testImplementation "io.github.adven27:env-db-db2:4.0.3"
-testImplementation "io.github.adven27:env-jar-application:4.0.3"
-testImplementation "io.github.adven27:env-mq-rabbit:4.0.3"
-testImplementation "io.github.adven27:env-mq-ibmmq:4.0.3"
-testImplementation "io.github.adven27:env-mq-redis:4.0.3"
-testImplementation "io.github.adven27:env-grpc-mock:4.0.3"
-testImplementation "io.github.adven27:env-wiremock:4.0.3"
+testImplementation "io.github.adven27:env-db-postgresql:4.0.4"
+testImplementation "io.github.adven27:env-db-mssql:4.0.4"
+testImplementation "io.github.adven27:env-db-mysql:4.0.4"
+testImplementation "io.github.adven27:env-db-oracle:4.0.4"
+testImplementation "io.github.adven27:env-db-oracle-temp:4.0.4"
+testImplementation "io.github.adven27:env-db-db2:4.0.4"
+testImplementation "io.github.adven27:env-jar-application:4.0.4"
+testImplementation "io.github.adven27:env-mq-rabbit:4.0.4"
+testImplementation "io.github.adven27:env-mq-ibmmq:4.0.4"
+testImplementation "io.github.adven27:env-mq-redis:4.0.4"
+testImplementation "io.github.adven27:env-grpc-mock:4.0.4"
+testImplementation "io.github.adven27:env-wiremock:4.0.4"
 ```
 
 2. Set up systems:
