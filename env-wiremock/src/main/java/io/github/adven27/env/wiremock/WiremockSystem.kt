@@ -34,6 +34,7 @@ open class WiremockSystem @JvmOverloads constructor(
             )
         )
         with(system.get()!!) {
+            configureJsonMapper()
             start()
             afterStart()
             Config(port())
@@ -81,10 +82,6 @@ open class WiremockSystem @JvmOverloads constructor(
             const val PROP_PORT = "env.wiremock.port"
             const val DEFAULT_PORT = 8888
         }
-    }
-
-    init {
-        configureJsonMapper()
     }
 
     companion object {
