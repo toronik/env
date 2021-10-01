@@ -25,5 +25,5 @@ class EmbeddedKafkaSystemTest {
 }
 
 class SomeEnvironment : Environment("EMBEDDED_KAFKA" to EmbeddedKafkaSystem("some-topic")) {
-    fun kafka() = find<EmbeddedKafkaSystem>()
+    fun kafka() = env<EmbeddedKafkaSystem>()
 }

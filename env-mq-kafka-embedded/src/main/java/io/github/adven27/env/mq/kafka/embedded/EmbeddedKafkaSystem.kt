@@ -31,7 +31,7 @@ open class EmbeddedKafkaSystem(
             CONTROLLED_SHUTDOWN,
             NUMBER_OF_PARTITIONS,
             *topics
-        ).brokerProperties(properties),
+        ).brokerProperties(mapOf("group.initial.rebalance.delay.ms" to "0") + properties),
         defaultPort
     )
 

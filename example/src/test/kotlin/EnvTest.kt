@@ -61,6 +61,6 @@ class SomeEnvironment : Environment(
     },
     "WIREMOCK" to WiremockSystem()
 ) {
-    fun rabbit() = find<RabbitContainerSystem>()
-    fun postgres() = find<PostgreSqlContainerSystem>()
+    fun rabbit() = env<RabbitContainerSystem>()
+    fun postgres() = env<PostgreSqlContainerSystem>()
 }
