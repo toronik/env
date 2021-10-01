@@ -103,6 +103,7 @@ open class Environment @JvmOverloads constructor(
 
     @Suppress("UNCHECKED_CAST")
     fun <T : ExternalSystem> find(name: String): T = (systems[name] ?: error("System $name not found")) as T
+    inline fun <reified T : ExternalSystem> find() = systems.values.filterIsInstance<T>().single()
 
     companion object : KLogging() {
         private fun start(
