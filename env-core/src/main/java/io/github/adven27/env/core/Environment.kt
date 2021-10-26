@@ -121,7 +121,9 @@ open class Environment @JvmOverloads constructor(
                 .toTypedArray()
 
         @JvmStatic
-        fun findAvailableTcpPort(): Int = SocketUtils.findAvailableTcpPort()
+        @JvmOverloads
+        fun findAvailableTcpPort(minPort: Int = 1024, maxPort: Int = 65535): Int =
+            SocketUtils.findAvailableTcpPort(minPort, maxPort)
 
         @JvmStatic
         fun String.fromPropertyOrElse(orElse: Long) = System.getProperty(this, orElse.toString()).toLong()

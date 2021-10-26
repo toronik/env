@@ -1,20 +1,29 @@
 package io.github.adven27.env.mq.kafka.embedded
 
+import io.github.adven27.env.core.Environment
 import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.core.GenericExternalSystem
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 
 @Suppress("unused")
-open class EmbeddedKafkaSystem(
+open class EmbeddedKafkaSystem @JvmOverloads constructor(
     private val embeddedKafka: EmbeddedKafkaBroker,
+    advertisedHost: String? = null,
     defaultPort: Int = DEFAULT_KAFKA_PORT,
 ) : GenericExternalSystem<EmbeddedKafkaBroker, EmbeddedKafkaSystem.Config>(
     system = embeddedKafka,
     config = Config(),
     start = { fixedEnv, system ->
-        if (fixedEnv) system.kafkaPorts(defaultPort)
-        system.afterPropertiesSet()
-        Config(system.brokersAsString)
+        val port = if (fixedEnv) defaultPort else Environment.findAvailableTcpPort()
+        var bootstrapServers = "localhost:$port"
+        advertisedHost?.let {
+            advertisedListener(it, port).also { (broker, props) ->
+                system.brokerProperties(props)
+                bootstrapServers += ", $broker"
+            }
+        }
+        system.kafkaPorts(port).afterPropertiesSet()
+        Config(bootstrapServers)
     },
     stop = { embeddedKafka.destroy() },
     running = { System.getProperty(EmbeddedKafkaBroker.SPRING_EMBEDDED_ZOOKEEPER_CONNECT) != null }
@@ -24,7 +33,8 @@ open class EmbeddedKafkaSystem(
     constructor(
         topics: Array<String>,
         properties: MutableMap<String, String> = mutableMapOf(),
-        defaultPort: Int = DEFAULT_KAFKA_PORT,
+        advertisedHost: String? = null,
+        defaultPort: Int = DEFAULT_KAFKA_PORT
     ) : this(
         EmbeddedKafkaBroker(
             NUMBER_OF_BROKERS,
@@ -32,11 +42,9 @@ open class EmbeddedKafkaSystem(
             NUMBER_OF_PARTITIONS,
             *topics
         ).brokerProperties(mapOf("group.initial.rebalance.delay.ms" to "0") + properties),
+        advertisedHost,
         defaultPort
     )
-
-    constructor(topics: Array<String>, properties: MutableMap<String, String> = mutableMapOf()) :
-        this(topics, properties, DEFAULT_KAFKA_PORT)
 
     @Suppress("SpreadOperator")
     constructor(vararg topics: String) : this(topics = arrayOf(*topics))
@@ -55,5 +63,14 @@ open class EmbeddedKafkaSystem(
         private const val NUMBER_OF_BROKERS = 1
         private const val NUMBER_OF_PARTITIONS = 1
         private const val CONTROLLED_SHUTDOWN = true
+
+        private fun advertisedListener(host: String, port: Int) =
+            Environment.findAvailableTcpPort().let {
+                ("$host:$it") to mapOf(
+                    "listeners" to "PLAINTEXT://:$port, REMOTE://:$it",
+                    "advertised.listeners" to "PLAINTEXT://localhost:$port, REMOTE://$host:$it",
+                    "listener.security.protocol.map" to "PLAINTEXT:PLAINTEXT, REMOTE:PLAINTEXT",
+                )
+            }
     }
 }

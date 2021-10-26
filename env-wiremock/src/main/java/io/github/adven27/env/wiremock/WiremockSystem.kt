@@ -38,7 +38,7 @@ open class WiremockSystem @JvmOverloads constructor(
             configureJsonMapper()
             start()
             afterStart()
-            Config(port())
+            Config(port = port())
         }
     },
     stop = { it.get()?.stop() },
@@ -76,12 +76,17 @@ open class WiremockSystem @JvmOverloads constructor(
             config().properties.entries.joinToString("\n\t") { it.toString() }
     }
 
-    fun client() = WireMock(config().port)
+    fun client() = WireMock(config().host, config().port)
 
-    data class Config(val port: Int = DEFAULT_PORT) : ExternalSystemConfig(PROP_PORT to port.toString()) {
+    data class Config(val host: String = DEFAULT_HOST, val port: Int = DEFAULT_PORT) : ExternalSystemConfig(
+        PROP_PORT to port.toString(),
+        PROP_HOST to port.toString()
+    ) {
         companion object {
             const val PROP_PORT = "env.wiremock.port"
+            const val PROP_HOST = "env.wiremock.host"
             const val DEFAULT_PORT = 8888
+            const val DEFAULT_HOST = "localhost"
         }
     }
 
