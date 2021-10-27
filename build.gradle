@@ -3,7 +3,7 @@ buildscript {
     ext.testContainers_version = '1.16.0'
     ext.wiremock_version = '2.30.1'
     ext.klogging_version = '2.0.11'
-    ext.libVersion = "4.0.5"
+    ext.libVersion = "4.0.6"
     ext.libGroup = 'io.github.adven27'
     repositories {
         mavenCentral()

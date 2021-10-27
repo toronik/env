@@ -80,7 +80,7 @@ open class WiremockSystem @JvmOverloads constructor(
 
     data class Config(val host: String = DEFAULT_HOST, val port: Int = DEFAULT_PORT) : ExternalSystemConfig(
         PROP_PORT to port.toString(),
-        PROP_HOST to port.toString()
+        PROP_HOST to host
     ) {
         companion object {
             const val PROP_PORT = "env.wiremock.port"
