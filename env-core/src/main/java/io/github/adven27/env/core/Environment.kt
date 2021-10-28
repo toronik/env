@@ -26,7 +26,7 @@ open class Environment @JvmOverloads constructor(
     ) : this(systems, configResolver.resolve())
 
     init {
-        logger.info("Environment settings:\nSystems: $systems\nConfig: $config")
+        logger.info("Environment settings:\nConfig: $config\nSystems:\n${systems.entries.joinToString("\n")}")
     }
 
     fun up() {

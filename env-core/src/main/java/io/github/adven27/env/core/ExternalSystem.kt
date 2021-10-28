@@ -30,10 +30,7 @@ open class GenericExternalSystem<T, C : ExternalSystemConfig> @JvmOverloads cons
         afterStart.invoke(system)
     }
 
-    override fun stop() {
-        stop.accept(system)
-    }
-
+    override fun stop() = stop.accept(system)
     override fun running(): Boolean = running.apply(system)
     override fun config() = config
 }
@@ -46,6 +43,7 @@ interface EnvironmentStrategy {
         private val orElse: Boolean = false
     ) : EnvironmentStrategy {
         override fun fixedEnv(): Boolean = System.getProperty(property, orElse.toString()).toBoolean()
+        override fun toString() = "System property toggle: $property, if absent: $orElse"
     }
 }
 
