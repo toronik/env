@@ -12,13 +12,13 @@ open class MySqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = MYSQL_PORT,
     private var config: Config = Config(),
-    private val afterStart: MySqlContainerSystem.() -> Unit = { }
+    private val afterStart: MySqlContainerSystem.() -> Unit = { },
 ) : MySQLContainer<Nothing>(dockerImageName), ExternalSystem {
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MySqlContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     override fun start() {
@@ -41,12 +41,12 @@ open class MySqlContainerSystem @JvmOverloads constructor(
         var jdbcUrl: String = "jdbc:mysql://localhost:$MYSQL_PORT/test?autoReconnect=true&useSSL=false",
         var username: String = "test",
         var password: String = "test",
-        var driver: String = "com.mysql.cj.jdbc.Driver"
+        var driver: String = "com.mysql.cj.jdbc.Driver",
     ) : ExternalSystemConfig(
         PROP_URL to jdbcUrl,
         PROP_USER to username,
         PROP_PASSWORD to password,
-        PROP_DRIVER to driver
+        PROP_DRIVER to driver,
     ) {
         companion object {
             const val PROP_URL = "env.db.mysql.url"

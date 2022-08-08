@@ -12,13 +12,13 @@ open class PostgreSqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = POSTGRESQL_PORT,
     private var config: Config = Config(),
-    private val afterStart: PostgreSqlContainerSystem.() -> Unit = { }
+    private val afterStart: PostgreSqlContainerSystem.() -> Unit = { },
 ) : PostgreSQLContainer<Nothing>(dockerImageName), ExternalSystem {
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: PostgreSqlContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -41,12 +41,12 @@ open class PostgreSqlContainerSystem @JvmOverloads constructor(
         val jdbcUrl: String = "jdbc:postgresql://localhost:$POSTGRESQL_PORT/postgres?stringtype=unspecified",
         val username: String = "test",
         val password: String = "test",
-        val driver: String = "org.postgresql.Driver"
+        val driver: String = "org.postgresql.Driver",
     ) : ExternalSystemConfig(
         PROP_URL to jdbcUrl,
         PROP_USER to username,
         PROP_PASSWORD to password,
-        PROP_DRIVER to driver
+        PROP_DRIVER to driver,
     ) {
         companion object {
             private const val PREFIX = "env.db.postgresql."

@@ -68,7 +68,7 @@ abstract class JarApplication @JvmOverloads constructor(
 
     class Config(
         val args: Array<String> = arrayOf(),
-        val systemProperties: Array<String> = arrayOf()
+        val systemProperties: Array<String> = arrayOf(),
     ) : ExternalSystemConfig() {
         fun addArgs(vararg args: String) = Config(this.args + arrayOf(*args), this.systemProperties)
         fun addSystemProperties(vararg properties: String) =

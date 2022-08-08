@@ -29,14 +29,14 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
             sysConfig.password,
         ).also {
             it.setDriverClassName(sysConfig.driver)
-        }
+        },
     )
 
     override fun start(fixedEnv: Boolean) {
         config = Config(
             url = sysConfig.url,
             username = if (fixedEnv) defaultScheme() else dynamicScheme(),
-            password = "test"
+            password = "test",
         )
 
         if (sysInitScriptPath != null) {
@@ -84,7 +84,7 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
         val url: String = "jdbc:oracle:thin:@host:port:sid",
         val username: String = "test",
         val password: String = "test",
-        val driver: String = "oracle.jdbc.OracleDriver"
+        val driver: String = "oracle.jdbc.OracleDriver",
     ) : ExternalSystemConfig(PROP_URL to url, PROP_USER to username, PROP_PASSWORD to password, PROP_DRIVER to driver) {
         companion object {
             private const val PREFIX = "env.db.oracle."
@@ -127,7 +127,7 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
                 ScriptUtils.DEFAULT_COMMENT_PREFIX,
                 delimiter,
                 ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-                ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER
+                ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER,
             )
         }
     }

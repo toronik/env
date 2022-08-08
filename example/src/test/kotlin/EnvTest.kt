@@ -55,7 +55,7 @@ class SomeEnvironment : Environment(
     "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
     },
-    "WIREMOCK" to WiremockSystem()
+    "WIREMOCK" to WiremockSystem(),
 ) {
     fun rabbit() = env<RabbitContainerSystem>()
     fun postgres() = env<PostgreSqlContainerSystem>()

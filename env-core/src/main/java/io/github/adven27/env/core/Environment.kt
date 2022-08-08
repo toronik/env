@@ -15,14 +15,14 @@ import kotlin.system.measureTimeMillis
 
 open class Environment @JvmOverloads constructor(
     val systems: Map<String, ExternalSystem>,
-    val config: Config = Config()
+    val config: Config = Config(),
 ) {
     constructor(config: Config = Config(), vararg systems: Pair<String, ExternalSystem>) : this(systems.toMap(), config)
     constructor(vararg systems: Pair<String, ExternalSystem>) : this(systems.toMap())
 
     constructor(
         systems: Map<String, ExternalSystem>,
-        configResolver: ConfigResolver
+        configResolver: ConfigResolver,
     ) : this(systems, configResolver.resolve())
 
     init {
@@ -72,7 +72,7 @@ open class Environment @JvmOverloads constructor(
                             logger.error("Failed to stop ${it.key}", expected)
                         }
                     }
-                }.toTypedArray()
+                }.toTypedArray(),
             )[config.downTimeout, SECONDS]
         }
     }
@@ -89,7 +89,7 @@ open class Environment @JvmOverloads constructor(
                 .onEach { logger.info(logDesc, it.key) }
                 .map { it.value }
                 .map { runAsync { operation(it) } }
-                .toTypedArray()
+                .toTypedArray(),
         ).thenRun { logger.info("Done. ${status()}") }[timeout, SECONDS]
     }
 
@@ -108,14 +108,14 @@ open class Environment @JvmOverloads constructor(
     companion object : KLogging() {
         private fun start(
             systems: Set<Map.Entry<String, ExternalSystem>>,
-            fixedEnv: Boolean
+            fixedEnv: Boolean,
         ): Array<CompletableFuture<Pair<String, Long>>> =
             systems
                 .onEach { logger.info("Preparing to start {}", it.key) }
                 .map {
                     supplyAsync(
                         { it.key to measureTimeMillis { it.value.start(fixedEnv) } },
-                        newCachedThreadPool(NamedThreadFactory(it.key))
+                        newCachedThreadPool(NamedThreadFactory(it.key)),
                     )
                 }
                 .toTypedArray()

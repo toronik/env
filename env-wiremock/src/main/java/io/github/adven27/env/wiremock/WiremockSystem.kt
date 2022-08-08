@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference
 open class WiremockSystem @JvmOverloads constructor(
     private val wireMockConfiguration: WireMockConfiguration,
     private val defaultPort: Int = DEFAULT_PORT,
-    afterStart: WireMockServer.() -> Unit = { }
+    afterStart: WireMockServer.() -> Unit = { },
 ) : GenericExternalSystem<AtomicReference<WireMockServer?>, WiremockSystem.Config>(
     system = AtomicReference<WireMockServer?>(),
     config = Config(),
@@ -30,9 +30,9 @@ open class WiremockSystem @JvmOverloads constructor(
                 wireMockConfiguration.port(
                     if (fixedEnv) defaultPort else findAvailableTcpPort().apply {
                         mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
-                    }
-                )
-            )
+                    },
+                ),
+            ),
         )
         with(system.get()!!) {
             configureJsonMapper()
@@ -42,7 +42,7 @@ open class WiremockSystem @JvmOverloads constructor(
         }
     },
     stop = { it.get()?.stop() },
-    running = { it.get()?.isRunning == true }
+    running = { it.get()?.isRunning == true },
 ) {
     @Suppress("unused")
     constructor(afterStart: WireMockServer.() -> Unit) : this(afterStart = afterStart, fixedPort = DEFAULT_PORT)
@@ -58,17 +58,17 @@ open class WiremockSystem @JvmOverloads constructor(
         wireMockConfiguration = additionalConfiguration.invoke(
             wireMockConfig()
                 .usingFilesUnderClasspath("wiremock")
-                .extensions(ResponseTemplateTransformer(true, helpers))
+                .extensions(ResponseTemplateTransformer(true, helpers)),
 
         ),
         defaultPort = fixedPort,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     @Suppress("unused")
     constructor(
         additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration,
-        afterStart: WireMockServer.() -> Unit = { }
+        afterStart: WireMockServer.() -> Unit = { },
     ) : this(mapOf(), afterStart, additionalConfiguration, DEFAULT_PORT)
 
     override fun describe() = with(system.get()) {
@@ -80,7 +80,7 @@ open class WiremockSystem @JvmOverloads constructor(
 
     data class Config(val host: String = DEFAULT_HOST, val port: Int = DEFAULT_PORT) : ExternalSystemConfig(
         PROP_PORT to port.toString(),
-        PROP_HOST to host
+        PROP_HOST to host,
     ) {
         companion object {
             const val PROP_PORT = "env.wiremock.port"

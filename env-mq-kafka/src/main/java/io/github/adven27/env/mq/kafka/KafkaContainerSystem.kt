@@ -16,30 +16,30 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     private val defaultPort: Int = KAFKA_PORT,
     private var config: Config = Config(),
     private val topicNameAndPartitionCount: Map<String, Int> = mapOf(),
-    private val afterStart: KafkaContainerSystem.() -> Unit = { }
+    private val afterStart: KafkaContainerSystem.() -> Unit = { },
 ) : KafkaContainer(dockerImageName), ExternalSystem {
 
     @JvmOverloads
     constructor(
         dockerImageName: DockerImageName,
         topicsAndPartitionCount: Map<String, Int>,
-        afterStart: KafkaContainerSystem.() -> Unit = { }
+        afterStart: KafkaContainerSystem.() -> Unit = { },
     ) : this(
         dockerImageName = dockerImageName,
         topicNameAndPartitionCount = topicsAndPartitionCount,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     @JvmOverloads
     constructor(topicsAndPartitionCount: Map<String, Int>, afterStart: KafkaContainerSystem.() -> Unit = { }) : this(
         topicNameAndPartitionCount = topicsAndPartitionCount,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: KafkaContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -62,12 +62,12 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     private fun createTopics(topicNameAndPartitionCount: Map<String, Int>) =
         AdminClient.create(mapOf(BOOTSTRAP_SERVERS_CONFIG to config.bootstrapServers)).use { admin ->
             admin.createTopics(
-                topicNameAndPartitionCount.map { topic -> NewTopic(topic.key, topic.value, 1.toShort()) }
+                topicNameAndPartitionCount.map { topic -> NewTopic(topic.key, topic.value, 1.toShort()) },
             )
         }
 
     data class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$KAFKA_PORT") : ExternalSystemConfig(
-        PROP_BOOTSTRAPSERVERS to bootstrapServers
+        PROP_BOOTSTRAPSERVERS to bootstrapServers,
     ) {
         companion object {
             const val PROP_BOOTSTRAPSERVERS = "env.mq.kafka.bootstrapServers"

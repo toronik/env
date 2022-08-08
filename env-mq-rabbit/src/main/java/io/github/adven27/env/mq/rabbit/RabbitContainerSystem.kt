@@ -13,13 +13,13 @@ open class RabbitContainerSystem @JvmOverloads constructor(
     private val defaultPort: Int = PORT,
     private val defaultPortAdm: Int = PORT_ADM,
     private var config: Config = Config(),
-    private val afterStart: RabbitContainerSystem.() -> Unit = { }
+    private val afterStart: RabbitContainerSystem.() -> Unit = { },
 ) : RabbitMQContainer(dockerImageName), ExternalSystem {
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RabbitContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -41,7 +41,7 @@ open class RabbitContainerSystem @JvmOverloads constructor(
 
     data class Config constructor(
         val host: String = "localhost",
-        val port: Int = PORT
+        val port: Int = PORT,
     ) : ExternalSystemConfig(PROP_HOST to host, PROP_PORT to port.toString()) {
         companion object {
             const val PROP_HOST = "env.mq.rabbit.host"

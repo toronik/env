@@ -26,7 +26,7 @@ open class IbmMQContainerSystem @JvmOverloads constructor(
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: IbmMQContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -34,7 +34,7 @@ open class IbmMQContainerSystem @JvmOverloads constructor(
         withEnv("LICENSE", "accept")
         withExposedPorts(PORT, PORT_ADM)
         waitingFor(
-            forLogMessage(".*The queue manager task 'AUTOCONFIG' has ended.*", 1).withStartupTimeout(ofSeconds(120))
+            forLogMessage(".*The queue manager task 'AUTOCONFIG' has ended.*", 1).withStartupTimeout(ofSeconds(120)),
         )
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("IBMMQ"))
         if (fixedEnv) {
@@ -78,7 +78,7 @@ data class RemoteMqWithTemporaryQueues(private val connectionFactory: MQConnecti
             this.queueManager = manager
             this.channel = channel
             this.temporaryModel = "SYSTEM.JMS.TEMPQ.MODEL"
-        }
+        },
     )
 
     init {
@@ -117,7 +117,7 @@ data class IbmMqConfig @JvmOverloads constructor(
     PROP_CHANNEL to channel,
     PROP_DEV_Q1 to devQueue1,
     PROP_DEV_Q2 to devQueue2,
-    PROP_DEV_Q3 to devQueue3
+    PROP_DEV_Q3 to devQueue3,
 ) {
     @Suppress("unused")
     val jmsTester1 = jmsConfig(devQueue1)

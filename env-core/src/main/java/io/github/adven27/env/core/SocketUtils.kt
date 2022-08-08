@@ -37,16 +37,13 @@ internal object SocketUtils {
     fun findAvailableTcpPorts(
         numRequested: Int,
         minPort: Int = PORT_RANGE_MIN,
-        maxPort: Int = PORT_RANGE_MAX
+        maxPort: Int = PORT_RANGE_MAX,
     ): SortedSet<Int> = TCP.findAvailablePorts(numRequested, minPort, maxPort)
 
     private enum class SocketType {
         TCP {
             override fun isPortAvailable(port: Int) = try {
-                val serverSocket = ServerSocketFactory.getDefault().createServerSocket(
-                    port, 1, InetAddress.getByName("localhost")
-                )
-                serverSocket.close()
+                ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost")).close()
                 true
             } catch (expected: Exception) {
                 false

@@ -26,7 +26,7 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
         Config(bootstrapServers)
     },
     stop = { embeddedKafka.destroy() },
-    running = { System.getProperty(EmbeddedKafkaBroker.SPRING_EMBEDDED_ZOOKEEPER_CONNECT) != null }
+    running = { System.getProperty(EmbeddedKafkaBroker.SPRING_EMBEDDED_ZOOKEEPER_CONNECT) != null },
 ) {
 
     @Suppress("SpreadOperator")
@@ -34,16 +34,16 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
         topics: Array<String>,
         properties: MutableMap<String, String> = mutableMapOf(),
         advertisedHost: String? = null,
-        defaultPort: Int = DEFAULT_KAFKA_PORT
+        defaultPort: Int = DEFAULT_KAFKA_PORT,
     ) : this(
         EmbeddedKafkaBroker(
             NUMBER_OF_BROKERS,
             CONTROLLED_SHUTDOWN,
             NUMBER_OF_PARTITIONS,
-            *topics
+            *topics,
         ).brokerProperties(mapOf("group.initial.rebalance.delay.ms" to "0") + properties),
         advertisedHost,
-        defaultPort
+        defaultPort,
     )
 
     @Suppress("SpreadOperator")

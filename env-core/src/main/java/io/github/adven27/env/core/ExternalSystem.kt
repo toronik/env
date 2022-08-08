@@ -23,7 +23,7 @@ open class GenericExternalSystem<T, C : ExternalSystemConfig> @JvmOverloads cons
     private val start: BiFunction<Boolean, T, C>,
     private val stop: Consumer<T>,
     private val running: Function<T, Boolean> = Function { true },
-    private val afterStart: T.() -> Unit = { }
+    private val afterStart: T.() -> Unit = { },
 ) : ExternalSystem {
     override fun start(fixedEnv: Boolean) {
         config = start.apply(fixedEnv, system)
@@ -40,7 +40,7 @@ interface EnvironmentStrategy {
 
     class SystemPropertyToggle @JvmOverloads constructor(
         private val property: String = "SPECS_ENV_FIXED",
-        private val orElse: Boolean = false
+        private val orElse: Boolean = false,
     ) : EnvironmentStrategy {
         override fun fixedEnv(): Boolean = System.getProperty(property, orElse.toString()).toBoolean()
         override fun toString() = "System property toggle: $property, if absent: $orElse"

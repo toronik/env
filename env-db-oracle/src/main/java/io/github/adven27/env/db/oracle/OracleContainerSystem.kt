@@ -12,13 +12,13 @@ open class OracleContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
     private var config: Config = Config(),
-    private val afterStart: OracleContainerSystem.() -> Unit = { }
+    private val afterStart: OracleContainerSystem.() -> Unit = { },
 ) : OracleContainer(dockerImageName), ExternalSystem {
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: OracleContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart
+        afterStart = afterStart,
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -43,12 +43,12 @@ open class OracleContainerSystem @JvmOverloads constructor(
         var jdbcUrl: String = "jdbc:oracle:thin:system/oracle@localhost:$PORT:xe",
         var username: String = "system",
         var password: String = "oracle",
-        var driver: String = "oracle.jdbc.OracleDriver"
+        var driver: String = "oracle.jdbc.OracleDriver",
     ) : ExternalSystemConfig(
         PROP_URL to jdbcUrl,
         PROP_USER to username,
         PROP_PASSWORD to password,
-        PROP_DRIVER to driver
+        PROP_DRIVER to driver,
     ) {
         companion object {
             const val PROP_URL = "env.db.oracle.url"

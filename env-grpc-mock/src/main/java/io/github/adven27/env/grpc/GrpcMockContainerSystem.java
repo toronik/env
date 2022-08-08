@@ -9,8 +9,8 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.utility.MountableFile;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -98,10 +98,7 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
         private final Integer mockPort;
 
         public Config(int grpcPort, int mockPort) {
-            super(new HashMap<String, String>() {{
-                put(PROP_GRPC_PORT, String.valueOf(grpcPort));
-                put(PROP_GRPC_MOCK_PORT, String.valueOf(mockPort));
-            }});
+            super(Map.of(PROP_GRPC_PORT, String.valueOf(grpcPort), PROP_GRPC_MOCK_PORT, String.valueOf(mockPort)));
             this.grpcPort = grpcPort;
             this.mockPort = mockPort;
         }

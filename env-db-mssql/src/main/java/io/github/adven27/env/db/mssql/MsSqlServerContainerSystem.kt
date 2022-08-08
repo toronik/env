@@ -47,7 +47,7 @@ open class MsSqlServerContainerSystem @JvmOverloads constructor(
         PROP_URL to jdbcUrl,
         PROP_USER to username,
         PROP_PASSWORD to password,
-        PROP_DRIVER to driver
+        PROP_DRIVER to driver,
     ) {
         companion object : KLogging() {
             const val PROP_URL = "env.db.sqlserver.url"

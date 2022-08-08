@@ -13,7 +13,7 @@ import java.util.function.BiFunction
 open class ContainerExternalSystem<T : GenericContainer<*>, C : ExternalSystemConfig> @JvmOverloads constructor(
     system: T,
     start: BiFunction<Boolean, T, ExternalSystemConfig>,
-    afterStart: T.() -> Unit = { }
+    afterStart: T.() -> Unit = { },
 ) : GenericExternalSystem<T, ExternalSystemConfig>(
     system,
     ExternalSystemConfig(),
