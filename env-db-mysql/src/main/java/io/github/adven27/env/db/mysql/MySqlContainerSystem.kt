@@ -58,6 +58,6 @@ open class MySqlContainerSystem @JvmOverloads constructor(
 
     companion object : KLogging() {
         @JvmField
-        val DEFAULT_IMAGE = "mysql:5.7.22".parseImage()
+        val DEFAULT_IMAGE = "mysql".parseImage()
     }
 }

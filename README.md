@@ -11,18 +11,18 @@ Idea is to be agnostic to tools used for specific external system emulation (e.g
 1. Add needed dependencies:
 
 ```groovy
-testImplementation "io.github.adven27:env-db-postgresql:4.0.7"
-testImplementation "io.github.adven27:env-db-mssql:4.0.7"
-testImplementation "io.github.adven27:env-db-mysql:4.0.7"
-testImplementation "io.github.adven27:env-db-oracle:4.0.7"
-testImplementation "io.github.adven27:env-db-oracle-temp:4.0.7"
-testImplementation "io.github.adven27:env-db-db2:4.0.7"
-testImplementation "io.github.adven27:env-jar-application:4.0.7"
-testImplementation "io.github.adven27:env-mq-rabbit:4.0.7"
-testImplementation "io.github.adven27:env-mq-ibmmq:4.0.7"
-testImplementation "io.github.adven27:env-mq-redis:4.0.7"
-testImplementation "io.github.adven27:env-grpc-mock:4.0.7"
-testImplementation "io.github.adven27:env-wiremock:4.0.7"
+testImplementation "io.github.adven27:env-db-postgresql:<version>"
+testImplementation "io.github.adven27:env-db-mssql:<version>"
+testImplementation "io.github.adven27:env-db-mysql:<version>"
+testImplementation "io.github.adven27:env-db-oracle:<version>"
+testImplementation "io.github.adven27:env-db-oracle-temp:<version>"
+testImplementation "io.github.adven27:env-db-db2:<version>"
+testImplementation "io.github.adven27:env-jar-application:<version>"
+testImplementation "io.github.adven27:env-mq-rabbit:<version>"
+testImplementation "io.github.adven27:env-mq-ibmmq:<version>"
+testImplementation "io.github.adven27:env-mq-redis:<version>"
+testImplementation "io.github.adven27:env-grpc-mock:<version>"
+testImplementation "io.github.adven27:env-wiremock:<version>"
 ```
 
 2. Set up systems:
@@ -41,8 +41,8 @@ class SomeEnvironment : Environment(
     },
     "WIREMOCK" to WiremockSystem()
 ) {
-    fun rabbit() = find<RabbitContainerSystem>("RABBIT")
-    fun mock() = find<WiremockSystem>("WIREMOCK")
+    fun rabbit() = env<RabbitContainerSystem>
+    fun mock() = env<WiremockSystem>
 }
 ```      
 

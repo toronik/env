@@ -22,7 +22,7 @@ publishing {
             pom {
                 name = project.name
                 description = 'Java library for a microservice environment emulation'
-                url = 'https://github.com/Adven27/env'
+                url = 'https://github.com/toronik/env'
 
                 licenses {
                     license {
@@ -32,22 +32,15 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = "Adven27"
+                        id = "toronik"
                         name = "Nikolai Toropanov"
-                        email = "n.toropanov@gmail.com"
+                        email = "me@toropanov.ru"
                     }
                 }
                 scm {
-                    url = "https://github.com/Adven27/env"
-                    connection = 'scm:git:git://github.com/Adven27/env.git'
-                    developerConnection = 'scm:git:git://github.com/Adven27/env.git'
-                }
-            }
-            repositories {
-                maven {
-                    name = 'ossrh'
-                    credentials(PasswordCredentials)
-                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    url = "https://github.com/toronik/env"
+                    connection = 'scm:git:git://github.com/toronik/env.git'
+                    developerConnection = 'scm:git:git://github.com/toronik/env.git'
                 }
             }
         }

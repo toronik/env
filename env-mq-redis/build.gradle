@@ -6,4 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
+    api 'redis.clients:jedis:4.2.3'
 }

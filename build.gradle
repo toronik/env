@@ -1,17 +1,21 @@
 buildscript {
-    ext.kotlin_version = '1.5.31'
-    ext.testContainers_version = '1.16.0'
-    ext.wiremock_version = '2.32.0'
+    ext.kotlin_version = '1.7.10'
+    ext.testContainers_version = '1.17.3'
+    ext.wiremock_version = '2.33.2'
     ext.klogging_version = '2.0.11'
-    ext.libVersion = "4.0.7"
+    ext.libVersion = "4.0.8"
     ext.libGroup = 'io.github.adven27'
     repositories {
         mavenCentral()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.17.1"
+        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.21.0"
     }
+}
+
+plugins {
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 group = libGroup
@@ -30,47 +34,58 @@ subprojects {
     group = libGroup
     version = libVersion
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 17
     compileJava.options.encoding = 'utf-8'
     compileTestJava.options.encoding = 'utf-8'
 
     compileKotlin {
         kotlinOptions {
             freeCompilerArgs = ['-Xjsr305=strict']
-            jvmTarget = '1.8'
+            jvmTarget = '11'
         }
     }
 
     compileTestKotlin {
         kotlinOptions {
             freeCompilerArgs = ['-Xjsr305=strict']
-            jvmTarget = '1.8'
+            jvmTarget = '11'
         }
     }
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        testImplementation 'ch.qos.logback:logback-classic:1.2.11'
+        testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.5.31'
     }
 
     apply from: "$rootDir/gradle/linters.gradle"
 }
 
 task publishMaven {
-    dependsOn ":env-core:publish"
-    dependsOn ":env-container:publish"
-    dependsOn ":env-db-db2:publish"
-    dependsOn ":env-db-mysql:publish"
-    dependsOn ":env-db-mssql:publish"
-    dependsOn ":env-db-postgresql:publish"
-    dependsOn ":env-db-oracle:publish"
-    dependsOn ":env-db-oracle-temp:publish"
-    dependsOn ":env-grpc-mock:publish"
-    dependsOn ":env-jar-application:publish"
-    dependsOn ":env-mq-kafka:publish"
-    dependsOn ":env-mq-kafka-embedded:publish"
-    dependsOn ":env-mq-rabbit:publish"
-    dependsOn ":env-mq-redis:publish"
-    dependsOn ":env-mq-ibmmq:publish"
-    dependsOn ":env-wiremock:publish"
+    dependsOn ":env-core:publishToSonatype"
+    dependsOn ":env-container:publishToSonatype"
+    dependsOn ":env-db-db2:publishToSonatype"
+    dependsOn ":env-db-mysql:publishToSonatype"
+    dependsOn ":env-db-mssql:publishToSonatype"
+    dependsOn ":env-db-postgresql:publishToSonatype"
+    dependsOn ":env-db-oracle:publishToSonatype"
+    dependsOn ":env-db-oracle-temp:publishToSonatype"
+    dependsOn ":env-grpc-mock:publishToSonatype"
+    dependsOn ":env-jar-application:publishToSonatype"
+    dependsOn ":env-mq-kafka:publishToSonatype"
+    dependsOn ":env-mq-kafka-embedded:publishToSonatype"
+    dependsOn ":env-mq-rabbit:publishToSonatype"
+    dependsOn ":env-mq-redis:publishToSonatype"
+    dependsOn ":env-mq-ibmmq:publishToSonatype"
+    dependsOn ":env-wiremock:publishToSonatype"
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
 }

@@ -54,6 +54,6 @@ open class RabbitContainerSystem @JvmOverloads constructor(
         private const val PORT_ADM = 15672
 
         @JvmField
-        val DEFAULT_IMAGE: DockerImageName = "rabbitmq:3.7.25-management-alpine".parseImage()
+        val DEFAULT_IMAGE: DockerImageName = "rabbitmq".parseImage()
     }
 }

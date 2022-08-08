@@ -59,6 +59,6 @@ open class PostgreSqlContainerSystem @JvmOverloads constructor(
 
     companion object : KLogging() {
         @JvmField
-        val DEFAULT_IMAGE = "postgres:9.6.12".parseImage()
+        val DEFAULT_IMAGE = "postgres".parseImage()
     }
 }

@@ -2,10 +2,8 @@ import io.github.adven27.env.core.Environment
 import io.github.adven27.env.db.mysql.MySqlContainerSystem
 import io.github.adven27.env.db.postgresql.PostgreSqlContainerSystem
 import io.github.adven27.env.grpc.GrpcMockContainerSystem
-import io.github.adven27.env.mq.ibmmq.IbmMQContainerSystem
 import io.github.adven27.env.mq.kafka.KafkaContainerSystem
 import io.github.adven27.env.mq.rabbit.RabbitContainerSystem
-import io.github.adven27.env.mq.redis.RedisContainerSystem
 import io.github.adven27.env.wiremock.WiremockSystem
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -52,8 +50,6 @@ class EnvTest {
 class SomeEnvironment : Environment(
     "KAFKA" to KafkaContainerSystem(),
     "RABBIT" to RabbitContainerSystem(),
-    "IBMMQ" to IbmMQContainerSystem(),
-    "REDIS" to RedisContainerSystem(),
     "POSTGRES" to PostgreSqlContainerSystem(),
     "MYSQL" to MySqlContainerSystem(),
     "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
