@@ -7,13 +7,13 @@ import mu.KLogging
 import org.testcontainers.containers.MSSQLServerContainer
 import org.testcontainers.utility.DockerImageName
 
-@Suppress("LongParameterList", "unused")
+@Suppress("unused")
 open class MsSqlServerContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = MS_SQL_SERVER_PORT,
-    private var config: Config = Config(),
     private val afterStart: MsSqlServerContainerSystem.() -> Unit = { },
 ) : MSSQLServerContainer<Nothing>(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MsSqlServerContainerSystem.() -> Unit) : this(
@@ -36,7 +36,6 @@ open class MsSqlServerContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config() = config
 
     data class Config @JvmOverloads constructor(
         var jdbcUrl: String = "jdbc:sqlserver://localhost\\Developer:$MS_SQL_SERVER_PORT",

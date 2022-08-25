@@ -15,7 +15,6 @@ import java.util.concurrent.locks.ReentrantLock
 abstract class JarApplication @JvmOverloads constructor(
     private var jar: File,
     private val waitingStrategy: WaitingStrategy,
-    protected var config: Config = Config(),
     protected var configureBeforeStart: (fixedEnv: Boolean, config: Config) -> Config = { _, cfg -> cfg },
     protected val startupTimeout: Duration = START_TIMEOUT,
 ) : ExternalSystem {
@@ -24,8 +23,9 @@ abstract class JarApplication @JvmOverloads constructor(
         waitingStrategy: WaitingStrategy,
         config: Config = Config(),
         startupTimeout: Duration = START_TIMEOUT,
-    ) : this(jar, waitingStrategy, config, { _, cfg -> cfg }, startupTimeout)
+    ) : this(jar, waitingStrategy, { _, cfg -> cfg }, startupTimeout)
 
+    override lateinit var config: Config
     private val system = ProcessBuilder().directory(jar.parentFile).inheritIO()
     private val lock = ReentrantLock()
     protected lateinit var process: Process
@@ -36,7 +36,6 @@ abstract class JarApplication @JvmOverloads constructor(
 
     override fun running() = waitingStrategy.ready()
     override fun describe() = process.toString() + " " + system.command() + "waiting " + waitingStrategy
-    override fun config() = config
     abstract fun waitStarted(startupTimeout: Duration)
 
     override fun start(fixedEnv: Boolean) {
@@ -84,11 +83,10 @@ abstract class JarApplication @JvmOverloads constructor(
 @Suppress("unused")
 open class JarTask @JvmOverloads constructor(
     jar: File,
-    config: Config,
     configureBeforeStart: (fixedEnv: Boolean, config: Config) -> Config = { _, cfg -> cfg },
     startupTimeout: Duration = START_TIMEOUT,
     private val waitingStrategy: WaitingStrategy = WaitingStrategy.ExecutionFinished(),
-) : JarApplication(jar, waitingStrategy, config, configureBeforeStart, startupTimeout) {
+) : JarApplication(jar, waitingStrategy, configureBeforeStart, startupTimeout) {
 
     override fun waitStarted(startupTimeout: Duration) = waitingStrategy.wait(startupTimeout, process)
 }

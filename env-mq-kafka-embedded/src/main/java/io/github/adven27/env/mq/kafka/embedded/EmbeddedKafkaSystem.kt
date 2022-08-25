@@ -12,7 +12,6 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
     defaultPort: Int = DEFAULT_KAFKA_PORT,
 ) : GenericExternalSystem<EmbeddedKafkaBroker, EmbeddedKafkaSystem.Config>(
     system = embeddedKafka,
-    config = Config(),
     start = { fixedEnv, system ->
         val port = if (fixedEnv) defaultPort else Environment.findAvailableTcpPort()
         var bootstrapServers = "localhost:$port"

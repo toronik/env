@@ -81,7 +81,7 @@ public class GrpcMockContainerSystem extends FixedHostPortGenericContainer<GrpcM
 
     @NotNull
     @Override
-    public ExternalSystemConfig config() {
+    public ExternalSystemConfig getConfig() {
         return new Config(port(), mockPort());
     }
 

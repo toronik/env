@@ -14,10 +14,10 @@ import org.testcontainers.utility.DockerImageName
 open class KafkaContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = KAFKA_PORT,
-    private var config: Config = Config(),
     private val topicNameAndPartitionCount: Map<String, Int> = mapOf(),
     private val afterStart: KafkaContainerSystem.() -> Unit = { },
 ) : KafkaContainer(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     @JvmOverloads
     constructor(
@@ -57,7 +57,6 @@ open class KafkaContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config(): Config = config
 
     private fun createTopics(topicNameAndPartitionCount: Map<String, Int>) =
         AdminClient.create(mapOf(BOOTSTRAP_SERVERS_CONFIG to config.bootstrapServers)).use { admin ->

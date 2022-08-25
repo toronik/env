@@ -15,13 +15,14 @@ import java.sql.SQLSyntaxErrorException
 @Suppress("TooManyFunctions", "LongParameterList", "unused")
 open class OracleTemporarySchemaSystem @JvmOverloads constructor(
     private var sysConfig: Config = Config(),
-    private var config: Config = Config(),
     private val createSchemaScript: String = "call CREATE_SCHEMA(?, ?)",
     private val dropSchemaScript: String = "call DROP_SCHEMA(?)",
     private var sysInitScriptPath: String? = "classpath:schemaManagementProcedures.sql",
     private var initScriptPath: String? = null,
     private val afterStart: OracleTemporarySchemaSystem.() -> Unit = { },
 ) : ExternalSystem, AutoCloseable {
+    override lateinit var config: Config
+
     private val jdbcTemplate = JdbcTemplate(
         DriverManagerDataSource(
             sysConfig.url,
@@ -78,7 +79,6 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config() = config
 
     data class Config @JvmOverloads constructor(
         val url: String = "jdbc:oracle:thin:@host:port:sid",

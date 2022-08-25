@@ -7,13 +7,13 @@ import mu.KLogging
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
-@Suppress("LongParameterList", "unused")
+@Suppress("unused")
 open class PostgreSqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = POSTGRESQL_PORT,
-    private var config: Config = Config(),
     private val afterStart: PostgreSqlContainerSystem.() -> Unit = { },
 ) : PostgreSQLContainer<Nothing>(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: PostgreSqlContainerSystem.() -> Unit) : this(
@@ -35,7 +35,6 @@ open class PostgreSqlContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config() = config
 
     data class Config @JvmOverloads constructor(
         val jdbcUrl: String = "jdbc:postgresql://localhost:$POSTGRESQL_PORT/postgres?stringtype=unspecified",

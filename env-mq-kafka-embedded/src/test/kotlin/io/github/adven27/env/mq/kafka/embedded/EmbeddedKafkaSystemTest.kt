@@ -15,7 +15,7 @@ class EmbeddedKafkaSystemTest {
         sut = SomeEnvironment().apply { up() }
 
         assertTrue(sut.kafka().running())
-        assertEquals(sut.kafka().config().bootstrapServers, System.getProperty(PROP_BOOTSTRAPSERVERS))
+        assertEquals(sut.kafka().config.bootstrapServers, System.getProperty(PROP_BOOTSTRAPSERVERS))
     }
 
     @After

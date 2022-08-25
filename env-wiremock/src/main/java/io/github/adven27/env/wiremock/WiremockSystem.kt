@@ -23,7 +23,6 @@ open class WiremockSystem @JvmOverloads constructor(
     afterStart: WireMockServer.() -> Unit = { },
 ) : GenericExternalSystem<AtomicReference<WireMockServer?>, WiremockSystem.Config>(
     system = AtomicReference<WireMockServer?>(),
-    config = Config(),
     start = { fixedEnv, system ->
         system.set(
             WireMockServer(
@@ -44,6 +43,8 @@ open class WiremockSystem @JvmOverloads constructor(
     stop = { it.get()?.stop() },
     running = { it.get()?.isRunning == true },
 ) {
+    val client: WireMock by lazy { WireMock(config.host, config.port) }
+
     @Suppress("unused")
     constructor(afterStart: WireMockServer.() -> Unit) : this(afterStart = afterStart, fixedPort = DEFAULT_PORT)
 
@@ -73,10 +74,17 @@ open class WiremockSystem @JvmOverloads constructor(
 
     override fun describe() = with(system.get()) {
         "${this?.baseUrl()} registered ${this?.listAllStubMappings()?.mappings?.size} mappings. \n\t" +
-            config().properties.entries.joinToString("\n\t") { it.toString() }
+            config.properties.entries.joinToString("\n\t") { it.toString() }
     }
 
-    fun client() = WireMock(config().host, config().port)
+    fun interactions() = client.serveEvents.sortedBy { it.request.loggedDate }
+        .map { Interaction(it.request.url, it.request.bodyAsString, it.response.bodyAsString) }
+
+    fun popInteractions() = interactions().also { cleanInteractions() }
+
+    fun cleanInteractions() = client.resetRequests()
+
+    data class Interaction(val url: String, val req: String, val resp: String)
 
     data class Config(val host: String = DEFAULT_HOST, val port: Int = DEFAULT_PORT) : ExternalSystemConfig(
         PROP_PORT to port.toString(),

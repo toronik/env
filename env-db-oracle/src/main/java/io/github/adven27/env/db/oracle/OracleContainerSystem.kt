@@ -7,13 +7,13 @@ import mu.KLogging
 import org.testcontainers.containers.OracleContainer
 import org.testcontainers.utility.DockerImageName
 
-@Suppress("LongParameterList", "unused")
+@Suppress("unused")
 open class OracleContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
-    private var config: Config = Config(),
     private val afterStart: OracleContainerSystem.() -> Unit = { },
 ) : OracleContainer(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: OracleContainerSystem.() -> Unit) : this(
@@ -37,7 +37,6 @@ open class OracleContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config() = config
 
     data class Config @JvmOverloads constructor(
         var jdbcUrl: String = "jdbc:oracle:thin:system/oracle@localhost:$PORT:xe",

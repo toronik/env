@@ -7,13 +7,13 @@ import mu.KLogging
 import org.testcontainers.containers.MySQLContainer
 import org.testcontainers.utility.DockerImageName
 
-@Suppress("LongParameterList", "unused")
+@Suppress("unused")
 open class MySqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = MYSQL_PORT,
-    private var config: Config = Config(),
     private val afterStart: MySqlContainerSystem.() -> Unit = { },
 ) : MySQLContainer<Nothing>(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MySqlContainerSystem.() -> Unit) : this(
@@ -35,7 +35,6 @@ open class MySqlContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config() = config
 
     data class Config @JvmOverloads constructor(
         var jdbcUrl: String = "jdbc:mysql://localhost:$MYSQL_PORT/test?autoReconnect=true&useSSL=false",

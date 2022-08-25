@@ -5,13 +5,13 @@ import io.github.adven27.env.core.ExternalSystemConfig
 import org.testcontainers.containers.Db2Container
 import org.testcontainers.utility.DockerImageName
 
-@Suppress("unused", "LongParameterList")
+@Suppress("unused")
 open class Db2ContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName,
     private val defaultPort: Int = DB2_PORT,
-    private var config: Config = Config(),
     private val afterStart: Db2ContainerSystem.() -> Unit = { },
 ) : Db2Container(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     override fun start(fixedEnv: Boolean) {
         acceptLicense()
@@ -28,7 +28,6 @@ open class Db2ContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config() = config
 
     data class Config @JvmOverloads constructor(
         var jdbcUrl: String = "jdbc:db2://localhost:$DB2_PORT/test",

@@ -17,7 +17,7 @@ class IbmMQContainerSystemTest {
         sut.up()
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
-        assertEquals(IbmMqConfig(), sut.ibmMq().config())
+        assertEquals(IbmMqConfig(), sut.ibmMq().config)
         assertEquals("1414", System.getProperty("env.mq.ibm.port"))
     }
 

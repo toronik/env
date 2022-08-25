@@ -4,7 +4,7 @@
 
 Java library for a microservice environment emulation.
 
-Idea is to be agnostic to tools used for specific external system emulation (e.g. docker, remote server, java standalone app or process). It enables to build up mixed environment consisted of differently set upped systems.
+Idea is to be agnostic to tools used for specific external system emulation (e.g. docker, remote server, java standalone app or process). It enables to build up mixed environment.
 
 ### How to use
 
@@ -20,8 +20,8 @@ testImplementation "io.github.adven27:env-db-db2:<version>"
 testImplementation "io.github.adven27:env-jar-application:<version>"
 testImplementation "io.github.adven27:env-mq-rabbit:<version>"
 testImplementation "io.github.adven27:env-mq-ibmmq:<version>"
-testImplementation "io.github.adven27:env-mq-redis:<version>"
 testImplementation "io.github.adven27:env-grpc-mock:<version>"
+testImplementation "io.github.adven27:env-redis:<version>"
 testImplementation "io.github.adven27:env-wiremock:<version>"
 ```
 
@@ -29,36 +29,28 @@ testImplementation "io.github.adven27:env-wiremock:<version>"
 
 ```kotlin
 class SomeEnvironment : Environment(
-    "RABBIT" to RabbitContainerSystem(),
-    "IBMMQ" to IbmMQContainerSystem(),
-    "KAFKA" to KafkaContainerSystem(),
-    "REDIS" to RedisContainerSystem(),
+    "KAFKA" to EmbeddedKafkaSystem("my.topic"),
     "POSTGRES" to PostgreSqlContainerSystem(),
-    "ORACLE" to OracleContainerSystem(),
-    "MYSQL" to MySqlContainerSystem(),
-    "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
-        withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
-    },
-    "WIREMOCK" to WiremockSystem()
+    "EXTERNAL_API" to WiremockSystem()
 ) {
-    fun rabbit() = env<RabbitContainerSystem>
-    fun mock() = env<WiremockSystem>
+    fun kafka() = env<EmbeddedKafkaSystem>().config.bootstrapServers
+    fun api() = env<WiremockSystem>().client
 }
-```      
+```
 
 3. Use in tests:
 
-```kotlin 
+```kotlin
 class MyTestClass {
     companion object {
-        private val ENV: SomeEnvironment = SomeEnvironment() 
+        private val ENV: SomeEnvironment = SomeEnvironment()
 
-        @BeforeClass @JvmStatic 
+        @BeforeClass @JvmStatic
         fun setup() {
            ENV.up()
         }
 
-        @AfterClass @JvmStatic 
+        @AfterClass @JvmStatic
         fun teardown() {
            ENV.down()
         }
@@ -66,11 +58,11 @@ class MyTestClass {
 
     @Test fun testSomething() {
         //some interactions with environment
-        ENV.mock().resetRequests()
+        ENV.api().resetRequests()
         //some test
         ...
     }
-} 
+}
 ```
 
 ### Run as standalone process
@@ -91,7 +83,7 @@ task runEnv(type: JavaExec) {
     systemProperty 'SPECS_ENV_FIXED', true
     standardInput = System.in
 }
-``` 
+```
 
 ## Examples
 

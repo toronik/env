@@ -97,9 +97,9 @@ open class Environment @JvmOverloads constructor(
         "Status:\n${systems.entries.joinToString("\n") { "${it.key}: ${if (it.value.running()) "up" else "down"}" }}"
 
     private fun summary(sysUpTime: Map<String, Long>) =
-        "${javaClass.simpleName}\n\n ======= Test environment started {} ms =======\n\n" +
+        "\n\n ======= ${javaClass.simpleName} started {} ms =======\n\n" +
             systems.entries.joinToString("\n") { "${it.key} [${sysUpTime[it.key]} ms]: ${it.value.describe()}" } +
-            "\n\n ==================================================\n\n"
+            "\n\n ==================================================\n"
 
     @Suppress("UNCHECKED_CAST")
     fun <T : ExternalSystem> env(name: String): T = (systems[name] ?: error("System $name not found")) as T
@@ -133,7 +133,7 @@ open class Environment @JvmOverloads constructor(
 
         @JvmStatic
         fun Map<String, String>.propagateToSystemProperties() = this.forEach { (p, v) ->
-            System.setProperty(p, v).also { logger.info("Set system property : $p = ${System.getProperty(p)}") }
+            System.setProperty(p, v).also { logger.info("Set system property: $p = ${System.getProperty(p)}") }
         }
     }
 

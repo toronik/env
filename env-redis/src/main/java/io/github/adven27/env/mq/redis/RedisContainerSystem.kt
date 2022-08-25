@@ -9,14 +9,15 @@ import org.testcontainers.utility.DockerImageName
 import redis.clients.jedis.Jedis
 import java.time.Duration.ofSeconds
 
+@Suppress("TooManyFunctions", "unused")
 open class RedisContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
-    private var config: Config = Config(),
     private val afterStart: RedisContainerSystem.() -> Unit = { },
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
-    protected val jedis: Jedis by lazy { Jedis(config().host, config().port) }
+    protected val jedis: Jedis by lazy { Jedis(config.host, config.port) }
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RedisContainerSystem.() -> Unit) : this(
@@ -39,16 +40,19 @@ open class RedisContainerSystem @JvmOverloads constructor(
         apply(afterStart)
     }
 
-    override fun config() = config
     override fun running() = isRunning
 
-    fun clean(): String = jedis.flushAll()
+    fun keys(pattern: String = "*") = jedis.keys(pattern)
+    fun clean(): String = jedis.flushAll().apply { }
+    fun del(key: String) = jedis.del(key)
     fun getHash(key: String): Map<String, String> = jedis.hgetAll(key)
-    fun setHash(key: String, field: String, value: String): Long = jedis.hset(key, field, value)
-    fun keys(pattern: String = "*"): Set<String> = jedis.keys(pattern)
+    fun putHash(key: String, field: String, value: String): Long = jedis.hset(key, field, value)
+    fun getList(key: String, start: Long = 0, stop: Long = -1) = jedis.lrange(key, start, stop) ?: emptyList()
+    fun pushList(key: String, vararg values: String) = jedis.lpush(key, *values)
+    fun exec(f: (Jedis) -> Unit) = f(jedis)
 
     data class Config @JvmOverloads constructor(val host: String = "localhost", val port: Int = PORT) :
-        ExternalSystemConfig("env.mq.redis.host" to host, "env.mq.redis.port" to port.toString())
+        ExternalSystemConfig("env.redis.host" to host, "env.redis.port" to port.toString())
 
     companion object : KLogging() {
         private const val PORT = 6379

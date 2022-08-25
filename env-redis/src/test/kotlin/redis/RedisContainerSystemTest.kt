@@ -17,8 +17,8 @@ class RedisContainerSystemTest {
         sut.up()
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
-        assertEquals(RedisContainerSystem.Config(), sut.redis().config())
-        assertEquals("6379", System.getProperty("env.mq.redis.port"))
+        assertEquals(RedisContainerSystem.Config(), sut.redis().config)
+        assertEquals("6379", System.getProperty("env.redis.port"))
     }
 
     @Test

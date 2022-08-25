@@ -12,9 +12,9 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DockerImageName.parse(IMAGE),
     private val defaultPort: Int = PORT,
     private val defaultPortAdm: Int = PORT_ADM,
-    private var config: Config = Config(),
     private val afterStart: FastDataDevKafkaContainerSystem.() -> Unit = { },
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     override fun start(fixedEnv: Boolean) {
         withEnv("ADV_HOST", "127.0.0.1")
@@ -34,7 +34,6 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config() = config
 
     data class Config @JvmOverloads constructor(
         val host: String = "localhost",

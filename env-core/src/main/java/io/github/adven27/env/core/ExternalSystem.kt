@@ -6,25 +6,26 @@ import java.util.function.Consumer
 import java.util.function.Function
 
 /**
- * Object responsible for managing some underlying system
+ * Object responsible for managing external system abstraction
  */
 interface ExternalSystem {
+    val config: ExternalSystemConfig
     fun start(fixedEnv: Boolean)
     fun stop()
     fun running(): Boolean
-    fun config(): ExternalSystemConfig
     fun describe(): String =
-        toString() + config().properties.entries.joinToString(separator = "\n\t", prefix = "\n\t") { it.toString() }
+        toString() + config.properties.entries.joinToString(separator = "\n\t", prefix = "\n\t") { it.toString() }
 }
 
 open class GenericExternalSystem<T, C : ExternalSystemConfig> @JvmOverloads constructor(
     protected var system: T,
-    private var config: C,
     private val start: BiFunction<Boolean, T, C>,
     private val stop: Consumer<T>,
     private val running: Function<T, Boolean> = Function { true },
     private val afterStart: T.() -> Unit = { },
 ) : ExternalSystem {
+    override lateinit var config: C
+
     override fun start(fixedEnv: Boolean) {
         config = start.apply(fixedEnv, system)
         afterStart.invoke(system)
@@ -32,7 +33,6 @@ open class GenericExternalSystem<T, C : ExternalSystemConfig> @JvmOverloads cons
 
     override fun stop() = stop.accept(system)
     override fun running(): Boolean = running.apply(system)
-    override fun config() = config
 }
 
 interface EnvironmentStrategy {

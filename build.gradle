@@ -3,7 +3,7 @@ buildscript {
     ext.testContainers_version = '1.17.3'
     ext.wiremock_version = '2.33.2'
     ext.klogging_version = '2.0.11'
-    ext.libVersion = "4.0.8"
+    ext.libVersion = "5.0.0"
     ext.libGroup = 'io.github.adven27'
     repositories {
         mavenCentral()
@@ -76,8 +76,8 @@ task publishMaven {
     dependsOn ":env-mq-kafka:publishToSonatype"
     dependsOn ":env-mq-kafka-embedded:publishToSonatype"
     dependsOn ":env-mq-rabbit:publishToSonatype"
-    dependsOn ":env-mq-redis:publishToSonatype"
     dependsOn ":env-mq-ibmmq:publishToSonatype"
+    dependsOn ":env-redis:publishToSonatype"
     dependsOn ":env-wiremock:publishToSonatype"
 }
 

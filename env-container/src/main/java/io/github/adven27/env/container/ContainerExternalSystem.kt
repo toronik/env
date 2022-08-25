@@ -16,7 +16,6 @@ open class ContainerExternalSystem<T : GenericContainer<*>, C : ExternalSystemCo
     afterStart: T.() -> Unit = { },
 ) : GenericExternalSystem<T, ExternalSystemConfig>(
     system,
-    ExternalSystemConfig(),
     start = start,
     stop = { it.stop() },
     running = { it.isRunning },

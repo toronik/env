@@ -12,9 +12,9 @@ open class RabbitContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
     private val defaultPortAdm: Int = PORT_ADM,
-    private var config: Config = Config(),
     private val afterStart: RabbitContainerSystem.() -> Unit = { },
 ) : RabbitMQContainer(dockerImageName), ExternalSystem {
+    override lateinit var config: Config
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RabbitContainerSystem.() -> Unit) : this(
@@ -37,7 +37,6 @@ open class RabbitContainerSystem @JvmOverloads constructor(
     }
 
     override fun running() = isRunning
-    override fun config(): Config = config
 
     data class Config constructor(
         val host: String = "localhost",
