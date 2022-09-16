@@ -29,12 +29,38 @@ testImplementation "io.github.adven27:env-wiremock:<version>"
 
 ```kotlin
 class SomeEnvironment : Environment(
-    "KAFKA" to EmbeddedKafkaSystem("my.topic"),
-    "POSTGRES" to PostgreSqlContainerSystem(),
-    "EXTERNAL_API" to WiremockSystem()
+    "DB" to PostgreSqlContainerSystem(),
+    "KAFKA" to EmbeddedKafkaSystem("some.topic", "another.topic"),
+    "RATES_API" to WiremockSystem(
+        helpers = mapOf(
+            "rateOf" to Helper { c, _ -> mapOf("USD" to 10, "RUB" to 100, "JPY" to 0.1, "CNY" to 0.01)[c.toString()] },
+        ),
+        afterStart = {
+            stubFor(
+                get(urlPathEqualTo("/rates"))
+                    .withQueryParam("baseCurrency", equalTo("EUR"))
+                    .withQueryParam("quoteCurrencies", notMatching("^\$"))
+                    .willReturn(
+                        okJson(
+                            """
+                            {
+                            "baseCurrency": "EUR",
+                            "rates": {
+                                {{#each request.query.quoteCurrencies as |cur|}}
+                                  "{{cur}}" : {{#if (rateOf cur)}} {{rateOf cur}} {{else}} null {{/if}} {{#unless @last}},{{/unless}}
+                                {{/each}}
+                                }
+                            }
+                            """.trimIndent()
+                        )
+                    )
+            )
+        }
+    )
 ) {
+    fun database() = env<PostgreSqlContainerSystem>().config
     fun kafka() = env<EmbeddedKafkaSystem>().config.bootstrapServers
-    fun api() = env<WiremockSystem>().client
+    fun api() = env<WiremockSystem>()
 }
 ```
 
@@ -58,7 +84,7 @@ class MyTestClass {
 
     @Test fun testSomething() {
         //some interactions with environment
-        ENV.api().resetRequests()
+        ENV.api().client.resetRequests()
         //some test
         ...
     }
