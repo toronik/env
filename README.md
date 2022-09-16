@@ -1,4 +1,5 @@
-![CI](https://github.com/Adven27/env/workflows/CI/badge.svg)
+[![][badge-ci]][workflow-ci]
+[![][badge-central]][oap-central]
 
 # env
 
@@ -115,3 +116,8 @@ task runEnv(type: JavaExec) {
 
 For more info see [demo project](https://github.com/Adven27/service-tests/blob/master/demo/src/test/kotlin/specs/Specs.kt#L51)
 
+
+[badge-central]: https://img.shields.io/maven-central/v/io.github.adven27/env-core?label=Maven%20Central
+[oap-central]: https://search.maven.org/search?q=io.github.adven27
+[badge-ci]: https://github.com/toronik/env/workflows/CI/badge.svg
+[workflow-ci]: https://github.com/toronik/env/actions?query=workflow%3Abuild
