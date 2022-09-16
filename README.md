@@ -18,12 +18,18 @@ testImplementation "io.github.adven27:env-db-mysql:<version>"
 testImplementation "io.github.adven27:env-db-oracle:<version>"
 testImplementation "io.github.adven27:env-db-oracle-temp:<version>"
 testImplementation "io.github.adven27:env-db-db2:<version>"
-testImplementation "io.github.adven27:env-jar-application:<version>"
+
+testImplementation "io.github.adven27:env-redis:<version>"
+
 testImplementation "io.github.adven27:env-mq-rabbit:<version>"
 testImplementation "io.github.adven27:env-mq-ibmmq:<version>"
-testImplementation "io.github.adven27:env-grpc-mock:<version>"
-testImplementation "io.github.adven27:env-redis:<version>"
+testImplementation "io.github.adven27:env-mq-kafka:<version>"
+testImplementation "io.github.adven27:env-mq-kafka-embedded:<version>"
+
 testImplementation "io.github.adven27:env-wiremock:<version>"
+testImplementation "io.github.adven27:env-grpc-mock:<version>"
+
+testImplementation "io.github.adven27:env-jar-application:<version>"
 ```
 
 2. Set up systems:
