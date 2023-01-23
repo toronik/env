@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.7.10'
-    ext.testContainers_version = '1.17.3'
+    ext.testContainers_version = '1.17.6'
     ext.wiremock_version = '2.33.2'
     ext.klogging_version = '2.0.11'
     ext.libVersion = "5.0.0"
@@ -66,6 +66,7 @@ task publishMaven {
     dependsOn ":env-core:publishToSonatype"
     dependsOn ":env-container:publishToSonatype"
     dependsOn ":env-db-db2:publishToSonatype"
+    dependsOn ":env-db-mongo:publishToSonatype"
     dependsOn ":env-db-mysql:publishToSonatype"
     dependsOn ":env-db-mssql:publishToSonatype"
     dependsOn ":env-db-postgresql:publishToSonatype"
