@@ -42,14 +42,19 @@ open class RedisContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
 
-    fun keys(pattern: String = "*") = jedis.keys(pattern)
-    fun clean(): String = jedis.flushAll().apply { }
-    fun del(key: String) = jedis.del(key)
+    fun keys(pattern: String = "*", vararg types: String) = jedis.keys(pattern).let { keys ->
+        if (types.isEmpty()) keys else keys.filter { jedis.type(it) in types }
+    }
+
+    fun clean(): String = jedis.flushAll()
+    fun type(key: String): String = jedis.type(key)
+    fun del(vararg keys: String) = jedis.del(*keys)
+    fun exists(vararg keys: String) = jedis.exists(*keys)
     fun getHash(key: String): Map<String, String> = jedis.hgetAll(key)
     fun putHash(key: String, field: String, value: String): Long = jedis.hset(key, field, value)
     fun getList(key: String, start: Long = 0, stop: Long = -1) = jedis.lrange(key, start, stop) ?: emptyList()
     fun pushList(key: String, vararg values: String) = jedis.lpush(key, *values)
-    fun exec(f: (Jedis) -> Unit) = f(jedis)
+    fun <T> exec(f: (Jedis) -> T) = f(jedis)
 
     data class Config @JvmOverloads constructor(val host: String = "localhost", val port: Int = PORT) :
         ExternalSystemConfig("env.redis.host" to host, "env.redis.port" to port.toString())
