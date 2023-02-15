@@ -67,6 +67,7 @@ task publishMaven {
     dependsOn ":env-container:publishToSonatype"
     dependsOn ":env-db-db2:publishToSonatype"
     dependsOn ":env-db-mongo:publishToSonatype"
+    dependsOn ":env-db-elastic:publishToSonatype"
     dependsOn ":env-db-mysql:publishToSonatype"
     dependsOn ":env-db-mssql:publishToSonatype"
     dependsOn ":env-db-postgresql:publishToSonatype"
