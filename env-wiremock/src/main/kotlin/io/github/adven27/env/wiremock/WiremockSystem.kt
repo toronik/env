@@ -65,9 +65,6 @@ open class WiremockSystem @JvmOverloads constructor(
     val client: WireMock by lazy { WireMock(config.host, config.port) }
 
     @Suppress("unused")
-    constructor(afterStart: WireMockServer.() -> Unit) : this(afterStart = afterStart, fixedPort = DEFAULT_PORT)
-
-    @Suppress("unused")
     @JvmOverloads
     constructor(
         helpers: Map<String, Helper<Any>> = mapOf(),
