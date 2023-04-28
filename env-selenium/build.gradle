@@ -6,5 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
-    api "com.github.tomakehurst:wiremock-jre8-standalone:$wiremock_version"
+    api "org.testcontainers:rabbitmq:$testContainers_version"
 }

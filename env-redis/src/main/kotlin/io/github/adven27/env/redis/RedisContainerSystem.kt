@@ -1,4 +1,4 @@
-package io.github.adven27.env.mq.redis
+package io.github.adven27.env.redis
 
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
@@ -17,7 +17,7 @@ open class RedisContainerSystem @JvmOverloads constructor(
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
     override lateinit var config: Config
 
-    protected val jedis: Jedis by lazy { Jedis(config.host, config.port) }
+    private val jedis: Jedis by lazy { Jedis(config.host, config.port) }
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RedisContainerSystem.() -> Unit) : this(
@@ -42,7 +42,7 @@ open class RedisContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
 
-    fun keys(pattern: String = "*", vararg types: String) = jedis.keys(pattern).let { keys ->
+    fun keys(pattern: String = "*", vararg types: String): Collection<String> = jedis.keys(pattern).let { keys ->
         if (types.isEmpty()) keys else keys.filter { jedis.type(it) in types }
     }
 
@@ -50,11 +50,14 @@ open class RedisContainerSystem @JvmOverloads constructor(
     fun type(key: String): String = jedis.type(key)
     fun del(vararg keys: String) = jedis.del(*keys)
     fun exists(vararg keys: String) = jedis.exists(*keys)
-    fun getHash(key: String): Map<String, String> = jedis.hgetAll(key)
-    fun putHash(key: String, field: String, value: String): Long = jedis.hset(key, field, value)
+    fun exists(key: String) = jedis.exists(key)
+    fun getMap(key: String): Map<String, String> = jedis.hgetAll(key)
+    fun setMap(key: String, field: String, value: String): Long = jedis.hset(key, field, value)
+    fun setMap(key: String, map: Map<String, String>): Long = jedis.hset(key, map)
     fun getList(key: String, start: Long = 0, stop: Long = -1) = jedis.lrange(key, start, stop) ?: emptyList()
-    fun pushList(key: String, vararg values: String) = jedis.lpush(key, *values)
-    fun <T> exec(f: (Jedis) -> T) = f(jedis)
+    fun setList(key: String, vararg values: String) = jedis.lpush(key, *values)
+    fun get(key: String): String = jedis.get(key)
+    fun set(key: String, value: String): String = jedis.set(key, value)
 
     data class Config @JvmOverloads constructor(val host: String = "localhost", val port: Int = PORT) :
         ExternalSystemConfig("env.redis.host" to host, "env.redis.port" to port.toString())

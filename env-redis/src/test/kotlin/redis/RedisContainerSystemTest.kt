@@ -1,7 +1,7 @@
 package redis
 
 import io.github.adven27.env.core.Environment
-import io.github.adven27.env.mq.redis.RedisContainerSystem
+import io.github.adven27.env.redis.RedisContainerSystem
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

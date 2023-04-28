@@ -1,5 +1,4 @@
-package specs
-
+import io.github.adven27.env.container.asCompatibleSubstituteFor
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
 import mu.KLogging
@@ -10,7 +9,7 @@ import javax.net.ssl.SSLContext
 
 @Suppress("unused")
 open class ElasticContainerSystem @JvmOverloads constructor(
-    dockerImageName: DockerImageName = DEFAULT_IMAGE.asCompatibleSubstituteFor("docker.elastic.co/elasticsearch/elasticsearch"),
+    dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = DEFAULT_PORT,
     private val securityEnabled: Boolean = false,
     private val password: String = ELASTICSEARCH_DEFAULT_PASSWORD,
@@ -69,7 +68,8 @@ open class ElasticContainerSystem @JvmOverloads constructor(
         private const val STARTUP_TIMEOUT = 30L
 
         @JvmField
-        val DEFAULT_IMAGE: DockerImageName = DockerImageName.parse("elasticsearch:8.6.0")
+        val DEFAULT_IMAGE: DockerImageName =
+            "elasticsearch:8.6.0" asCompatibleSubstituteFor "docker.elastic.co/elasticsearch/elasticsearch"
     }
 
     data class Config @JvmOverloads constructor(

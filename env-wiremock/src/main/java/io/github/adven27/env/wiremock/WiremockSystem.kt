@@ -2,10 +2,12 @@ package io.github.adven27.env.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.common.ClasspathFileSource
 import com.github.tomakehurst.wiremock.common.Json
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
+import com.github.tomakehurst.wiremock.recording.RecordSpecBuilder
 import io.github.adven27.env.core.Environment.Companion.findAvailableTcpPort
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
 import io.github.adven27.env.core.ExternalSystemConfig
@@ -20,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference
 open class WiremockSystem @JvmOverloads constructor(
     private val wireMockConfiguration: WireMockConfiguration,
     private val defaultPort: Int = DEFAULT_PORT,
+    private val record: RecordSpecBuilder? = null,
     afterStart: WireMockServer.() -> Unit = { },
 ) : GenericExternalSystem<AtomicReference<WireMockServer?>, WiremockSystem.Config>(
     system = AtomicReference<WireMockServer?>(),
@@ -27,8 +30,12 @@ open class WiremockSystem @JvmOverloads constructor(
         system.set(
             WireMockServer(
                 wireMockConfiguration.port(
-                    if (fixedEnv) defaultPort else findAvailableTcpPort().apply {
-                        mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
+                    if (fixedEnv) {
+                        defaultPort
+                    } else {
+                        findAvailableTcpPort().apply {
+                            mapOf(PROP_PORT to this.toString()).propagateToSystemProperties()
+                        }
                     },
                 ),
             ),
@@ -36,11 +43,23 @@ open class WiremockSystem @JvmOverloads constructor(
         with(system.get()!!) {
             configureJsonMapper()
             start()
+            record?.let {
+                enableRecordMappings(ClasspathFileSource("wiremock/mappings"), ClasspathFileSource("wiremock/__files"))
+                startRecording(it)
+            }
             afterStart()
             Config(port = port())
         }
     },
-    stop = { it.get()?.stop() },
+    stop = {
+        it.get()?.apply {
+            record?.let {
+                stopRecording()
+                saveMappings()
+            }
+            stop()
+        }
+    },
     running = { it.get()?.isRunning == true },
 ) {
     val client: WireMock by lazy { WireMock(config.host, config.port) }
@@ -53,6 +72,7 @@ open class WiremockSystem @JvmOverloads constructor(
     constructor(
         helpers: Map<String, Helper<Any>> = mapOf(),
         afterStart: WireMockServer.() -> Unit = { },
+        record: RecordSpecBuilder? = null,
         additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration = { this },
         fixedPort: Int = DEFAULT_PORT,
     ) : this(
@@ -63,14 +83,17 @@ open class WiremockSystem @JvmOverloads constructor(
 
         ),
         defaultPort = fixedPort,
+        record = record,
         afterStart = afterStart,
     )
 
     @Suppress("unused")
+    @JvmOverloads
     constructor(
         additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration,
         afterStart: WireMockServer.() -> Unit = { },
-    ) : this(mapOf(), afterStart, additionalConfiguration, DEFAULT_PORT)
+        record: RecordSpecBuilder? = null,
+    ) : this(mapOf(), afterStart, record, additionalConfiguration, DEFAULT_PORT)
 
     override fun describe() = with(system.get()) {
         "${this?.baseUrl()} registered ${this?.listAllStubMappings()?.mappings?.size} mappings. \n\t" +
@@ -81,7 +104,6 @@ open class WiremockSystem @JvmOverloads constructor(
         .map { Interaction(it.request.url, it.request.bodyAsString, it.response.bodyAsString) }
 
     fun popInteractions() = interactions().also { cleanInteractions() }
-
     fun cleanInteractions() = client.resetRequests()
 
     data class Interaction(val url: String, val req: String, val resp: String)
