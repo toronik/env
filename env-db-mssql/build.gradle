@@ -6,5 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
-    api "org.testcontainers:mssqlserver:1.15.3"
+    api "org.testcontainers:mssqlserver:$testContainers_version"
 }

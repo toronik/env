@@ -18,7 +18,7 @@ import java.time.Duration
 open class WiremockContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
-    private val afterStart: WiremockContainerSystem.() -> Unit = { },
+    private val afterStart: WiremockContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
 
     companion object : KLogging() {
@@ -42,7 +42,7 @@ open class WiremockContainerSystem @JvmOverloads constructor(
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: WiremockContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart,
+        afterStart = afterStart
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -63,11 +63,11 @@ open class WiremockContainerSystem @JvmOverloads constructor(
 
     data class Config @JvmOverloads constructor(
         val host: String = "localhost",
-        val port: Int = PORT,
+        val port: Int = PORT
     ) : ExternalSystemConfig(
         "env.wiremock.host" to host,
         "env.wiremock.external-host" to (if (getenv("CI") == null) host else "host.docker.internal"),
-        "env.wiremock.port" to port.toString(),
+        "env.wiremock.port" to port.toString()
     )
 
     fun interactions() = client.serveEvents.sortedBy { it.request.loggedDate }

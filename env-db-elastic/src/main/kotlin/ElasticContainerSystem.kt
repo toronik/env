@@ -13,7 +13,7 @@ open class ElasticContainerSystem @JvmOverloads constructor(
     private val defaultPort: Int = DEFAULT_PORT,
     private val securityEnabled: Boolean = false,
     private val password: String = ELASTICSEARCH_DEFAULT_PASSWORD,
-    private val afterStart: ElasticContainerSystem.() -> Unit = { },
+    private val afterStart: ElasticContainerSystem.() -> Unit = { }
 ) : ElasticsearchContainer(dockerImageName), ExternalSystem {
 
     override lateinit var config: Config
@@ -46,7 +46,7 @@ open class ElasticContainerSystem @JvmOverloads constructor(
             firstMappedPort.toString(),
             DEFAULT_USER,
             envMap["ELASTIC_PASSWORD"].toString(),
-            createSslContextFromCa(),
+            createSslContextFromCa()
         )
     } else {
         Config(host, firstMappedPort.toString())
@@ -57,8 +57,8 @@ open class ElasticContainerSystem @JvmOverloads constructor(
             mapOf(
                 // major version 8 is secured by default, so we need to manually disable authentication
                 "xpack.security.enabled" to "false",
-                "xpack.security.enrollment.enabled" to "true",
-            ),
+                "xpack.security.enrollment.enabled" to "true"
+            )
         )
     }
 
@@ -77,13 +77,13 @@ open class ElasticContainerSystem @JvmOverloads constructor(
         val port: String = DEFAULT_PORT.toString(),
         val user: String = DEFAULT_USER,
         val password: String = ELASTICSEARCH_DEFAULT_PASSWORD,
-        val sslContext: SSLContext? = null,
+        val sslContext: SSLContext? = null
     ) :
         ExternalSystemConfig(
             HOST_PROP to host,
             PORT_PROP to port,
             USER_PROP to user,
-            PASSWORD_PROP to password,
+            PASSWORD_PROP to password
         ) {
 
         fun hostAndPort() = "$host:$port"

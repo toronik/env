@@ -9,11 +9,11 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 
-@Suppress("TooManyFunctions", "unused")
+@Suppress("unused")
 open class SeleniumContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
-    private val afterStart: SeleniumContainerSystem.() -> Unit = { },
+    private val afterStart: SeleniumContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
 
     companion object : KLogging() {
@@ -21,7 +21,7 @@ open class SeleniumContainerSystem @JvmOverloads constructor(
         private const val STARTUP_TIMEOUT = 30L
 
         @JvmField
-        val DEFAULT_IMAGE = "seleniarm/standalone-chromium".parseImage()
+        val DEFAULT_IMAGE = "selenium/standalone-chrome".parseImage()
     }
 
     override lateinit var config: Config
@@ -29,7 +29,7 @@ open class SeleniumContainerSystem @JvmOverloads constructor(
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: SeleniumContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart,
+        afterStart = afterStart
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -53,9 +53,9 @@ open class SeleniumContainerSystem @JvmOverloads constructor(
 
     data class Config @JvmOverloads constructor(
         val host: String = "localhost",
-        val port: Int = PORT,
+        val port: Int = PORT
     ) : ExternalSystemConfig(
         "env.selenium.host" to host,
-        "env.selenium.port" to port.toString(),
+        "env.selenium.port" to port.toString()
     )
 }

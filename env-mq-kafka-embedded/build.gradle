@@ -6,5 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-core')
-    api('org.springframework.kafka:spring-kafka-test:2.9.0')
+    api('org.springframework.kafka:spring-kafka-test:3.0.6')
 }

@@ -12,7 +12,7 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DockerImageName.parse(IMAGE),
     private val defaultPort: Int = PORT,
     private val defaultPortAdm: Int = PORT_ADM,
-    private val afterStart: FastDataDevKafkaContainerSystem.() -> Unit = { },
+    private val afterStart: FastDataDevKafkaContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
     override lateinit var config: Config
 
@@ -37,7 +37,7 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
 
     data class Config @JvmOverloads constructor(
         val host: String = "localhost",
-        val port: Int = PORT,
+        val port: Int = PORT
     ) : ExternalSystemConfig("env.mq.kafka.host" to host, "env.mq.kafka.port" to port.toString())
 
     companion object : KLogging() {

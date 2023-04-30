@@ -1,6 +1,7 @@
 package redis
 
 import io.github.adven27.env.core.Environment
+import io.github.adven27.env.core.EnvironmentStrategy
 import io.github.adven27.env.redis.RedisContainerSystem
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -12,7 +13,7 @@ class RedisContainerSystemTest {
 
     @Test
     fun fixedEnvironment() {
-        System.setProperty("SPECS_ENV_FIXED", "true")
+        System.setProperty(EnvironmentStrategy.SystemPropertyToggle.ENV_FIXED, "true")
 
         sut.up()
 
@@ -23,8 +24,6 @@ class RedisContainerSystemTest {
 
     @Test
     fun dynamicEnvironment() {
-        System.setProperty("SPECS_ENV_FIXED", "false")
-
         sut.up()
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }

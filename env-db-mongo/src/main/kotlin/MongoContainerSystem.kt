@@ -9,14 +9,14 @@ import org.testcontainers.utility.DockerImageName
 open class MongoContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = DEFAULT_PORT,
-    private val afterStart: MongoContainerSystem.() -> Unit = { },
+    private val afterStart: MongoContainerSystem.() -> Unit = { }
 ) : MongoDBContainer(dockerImageName), ExternalSystem {
     override lateinit var config: Config
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: MongoContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart,
+        afterStart = afterStart
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -37,11 +37,11 @@ open class MongoContainerSystem @JvmOverloads constructor(
     data class Config @JvmOverloads constructor(
         val host: String,
         val port: String,
-        val url: String = "mongodb://$host:$port",
+        val url: String = "mongodb://$host:$port"
     ) : ExternalSystemConfig(
         PROP_HOST to host,
         PROP_PORT to port,
-        PROP_URL to url,
+        PROP_URL to url
     ) {
         companion object {
             private const val PREFIX = "env.db.mongo."

@@ -16,13 +16,13 @@ abstract class JarApplication @JvmOverloads constructor(
     private var jar: File,
     private val waitingStrategy: WaitingStrategy,
     protected var configureBeforeStart: (fixedEnv: Boolean, config: Config) -> Config = { _, cfg -> cfg },
-    protected val startupTimeout: Duration = START_TIMEOUT,
+    protected val startupTimeout: Duration = START_TIMEOUT
 ) : ExternalSystem {
     constructor(
         jar: File,
         waitingStrategy: WaitingStrategy,
         config: Config = Config(),
-        startupTimeout: Duration = START_TIMEOUT,
+        startupTimeout: Duration = START_TIMEOUT
     ) : this(jar, waitingStrategy, { _, cfg -> cfg }, startupTimeout)
 
     override lateinit var config: Config
@@ -67,7 +67,7 @@ abstract class JarApplication @JvmOverloads constructor(
 
     class Config(
         val args: Array<String> = arrayOf(),
-        val systemProperties: Array<String> = arrayOf(),
+        val systemProperties: Array<String> = arrayOf()
     ) : ExternalSystemConfig() {
         fun addArgs(vararg args: String) = Config(this.args + arrayOf(*args), this.systemProperties)
         fun addSystemProperties(vararg properties: String) =
@@ -85,7 +85,7 @@ open class JarTask @JvmOverloads constructor(
     jar: File,
     configureBeforeStart: (fixedEnv: Boolean, config: Config) -> Config = { _, cfg -> cfg },
     startupTimeout: Duration = START_TIMEOUT,
-    private val waitingStrategy: WaitingStrategy = WaitingStrategy.ExecutionFinished(),
+    private val waitingStrategy: WaitingStrategy = WaitingStrategy.ExecutionFinished()
 ) : JarApplication(jar, waitingStrategy, configureBeforeStart, startupTimeout) {
 
     override fun waitStarted(startupTimeout: Duration) = waitingStrategy.wait(startupTimeout, process)
@@ -99,7 +99,7 @@ open class JarWebService @JvmOverloads constructor(
     private val configurePort: (fixedEnv: Boolean, port: Int, config: Config) -> Config = { _, _, cfg -> cfg },
     healthPath: String = "/actuator/info",
     startupTimeout: Duration = START_TIMEOUT,
-    private val waitingStrategy: WaitingStrategy = HealthCheckUrl(healthPath),
+    private val waitingStrategy: WaitingStrategy = HealthCheckUrl(healthPath)
 ) : JarApplication(jar, waitingStrategy, config, startupTimeout) {
     var port: Int = defaultPort
 

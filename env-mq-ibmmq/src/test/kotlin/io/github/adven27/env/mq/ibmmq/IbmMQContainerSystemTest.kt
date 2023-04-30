@@ -1,6 +1,7 @@
 package io.github.adven27.env.mq.ibmmq
 
 import io.github.adven27.env.core.Environment
+import io.github.adven27.env.core.EnvironmentStrategy
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -11,8 +12,8 @@ class IbmMQContainerSystemTest {
 
     @Test
     fun fixedEnvironment() {
-        System.setProperty("SPECS_ENV_FIXED", "true")
-        System.setProperty("SPECS_ENV_UP_TIMEOUT_SEC", "500")
+        System.setProperty(EnvironmentStrategy.SystemPropertyToggle.ENV_FIXED, "true")
+        System.setProperty(Environment.ConfigResolver.FromSystemProperty.ENV_UP_TIMEOUT_SEC, "500")
 
         sut.up()
 
@@ -23,8 +24,7 @@ class IbmMQContainerSystemTest {
 
     @Test
     fun dynamicEnvironment() {
-        System.setProperty("SPECS_ENV_FIXED", "false")
-        System.setProperty("SPECS_ENV_UP_TIMEOUT_SEC", "500")
+        System.setProperty(Environment.ConfigResolver.FromSystemProperty.ENV_UP_TIMEOUT_SEC, "500")
 
         sut.up()
 

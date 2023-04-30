@@ -1,10 +1,10 @@
 configurations.create("ktl")
 
 dependencies {
-    ktl "com.pinterest:ktlint:0.46.1"
+    ktl "com.pinterest:ktlint:0.49.0"
 }
 
-task ktlint(type: JavaExec, group: "verification") {
+tasks.register('ktlint', JavaExec) {
     description = "Check Kotlin code style."
     classpath = configurations.ktl
     main = "com.pinterest.ktlint.Main"
@@ -13,7 +13,7 @@ task ktlint(type: JavaExec, group: "verification") {
 
 check.dependsOn ktlint
 
-task ktlintFormat(type: JavaExec, group: "formatting") {
+tasks.register('ktlintFormat', JavaExec) {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktl
     main = "com.pinterest.ktlint.Main"

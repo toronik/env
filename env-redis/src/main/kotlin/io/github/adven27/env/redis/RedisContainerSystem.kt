@@ -13,7 +13,7 @@ import java.time.Duration.ofSeconds
 open class RedisContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
-    private val afterStart: RedisContainerSystem.() -> Unit = { },
+    private val afterStart: RedisContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
     override lateinit var config: Config
 
@@ -22,7 +22,7 @@ open class RedisContainerSystem @JvmOverloads constructor(
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: RedisContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart,
+        afterStart = afterStart
     )
 
     override fun start(fixedEnv: Boolean) {

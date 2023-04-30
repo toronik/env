@@ -1,4 +1,5 @@
 import io.github.adven27.env.core.Environment
+import io.github.adven27.env.core.EnvironmentStrategy
 import io.github.adven27.env.db.mysql.MySqlContainerSystem
 import io.github.adven27.env.db.postgresql.PostgreSqlContainerSystem
 import io.github.adven27.env.grpc.GrpcMockContainerSystem
@@ -15,13 +16,13 @@ import org.testcontainers.containers.output.Slf4jLogConsumer
 private const val PG_URL = "jdbc:postgresql://localhost:5432/test?loggerLevel=OFF"
 
 class EnvTest {
-    private lateinit var sut: SomeEnvironment
+    private var sut: SomeEnvironment = SomeEnvironment()
 
     @Test
     fun fixedEnvironment() {
-        System.setProperty("SPECS_ENV_FIXED", "true")
+        System.setProperty(EnvironmentStrategy.SystemPropertyToggle.ENV_FIXED, "true")
 
-        sut = SomeEnvironment().apply { up() }
+        sut.up()
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
         assertEquals(5672, sut.rabbit().config.port)
@@ -32,9 +33,7 @@ class EnvTest {
 
     @Test
     fun dynamicEnvironment() {
-        System.setProperty("SPECS_ENV_FIXED", "false")
-
-        sut = SomeEnvironment().apply { up() }
+        sut.up()
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
         assertNotEquals(5672, sut.rabbit().config.port)
@@ -55,7 +54,7 @@ class SomeEnvironment : Environment(
     "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
     },
-    "WIREMOCK" to WiremockSystem(),
+    "WIREMOCK" to WiremockSystem()
 ) {
     fun rabbit() = env<RabbitContainerSystem>()
     fun postgres() = env<PostgreSqlContainerSystem>()

@@ -19,14 +19,14 @@ open class IbmMQContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
     private val defaultPortAdm: Int = PORT_ADM,
-    private val afterStart: IbmMQContainerSystem.() -> Unit = { },
+    private val afterStart: IbmMQContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
     override lateinit var config: IbmMqConfig
 
     @JvmOverloads
     constructor(imageName: DockerImageName = DEFAULT_IMAGE, afterStart: IbmMQContainerSystem.() -> Unit) : this(
         dockerImageName = imageName,
-        afterStart = afterStart,
+        afterStart = afterStart
     )
 
     override fun start(fixedEnv: Boolean) {
@@ -34,7 +34,7 @@ open class IbmMQContainerSystem @JvmOverloads constructor(
         withEnv("LICENSE", "accept")
         withExposedPorts(PORT, PORT_ADM)
         waitingFor(
-            forLogMessage(".*The queue manager task 'AUTOCONFIG' has ended.*", 1).withStartupTimeout(ofSeconds(120)),
+            forLogMessage(".*The queue manager task 'AUTOCONFIG' has ended.*", 1).withStartupTimeout(ofSeconds(120))
         )
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("IBMMQ"))
         if (fixedEnv) {
@@ -77,7 +77,7 @@ data class RemoteMqWithTemporaryQueues(private val connectionFactory: MQConnecti
             this.queueManager = manager
             this.channel = channel
             this.temporaryModel = "SYSTEM.JMS.TEMPQ.MODEL"
-        },
+        }
     )
 
     init {
@@ -89,7 +89,7 @@ data class RemoteMqWithTemporaryQueues(private val connectionFactory: MQConnecti
                 channel = connectionFactory.channel,
                 devQueue1 = session.tempQueue(),
                 devQueue2 = session.tempQueue(),
-                devQueue3 = session.tempQueue(),
+                devQueue3 = session.tempQueue()
             )
         }
     }
@@ -108,7 +108,7 @@ data class IbmMqConfig @JvmOverloads constructor(
     val channel: String = "DEV.APP.SVRCONN",
     val devQueue1: String = "DEV.QUEUE.1",
     val devQueue2: String = "DEV.QUEUE.2",
-    val devQueue3: String = "DEV.QUEUE.3",
+    val devQueue3: String = "DEV.QUEUE.3"
 ) : ExternalSystemConfig(
     PROP_HOST to host,
     PROP_PORT to port.toString(),
@@ -116,7 +116,7 @@ data class IbmMqConfig @JvmOverloads constructor(
     PROP_CHANNEL to channel,
     PROP_DEV_Q1 to devQueue1,
     PROP_DEV_Q2 to devQueue2,
-    PROP_DEV_Q3 to devQueue3,
+    PROP_DEV_Q3 to devQueue3
 ) {
     @Suppress("unused")
     val jmsTester1 = jmsConfig(devQueue1)

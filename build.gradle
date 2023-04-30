@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 buildscript {
     ext.kotlin_version = '1.8.21'
     ext.testContainers_version = '1.18.0'
@@ -40,16 +42,16 @@ subprojects {
     compileTestJava.options.encoding = 'utf-8'
 
     compileKotlin {
-        kotlinOptions {
-            freeCompilerArgs = ['-Xjsr305=strict']
-            jvmTarget = '11'
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.addAll("-Xjsr305=strict")
         }
     }
 
     compileTestKotlin {
-        kotlinOptions {
-            freeCompilerArgs = ['-Xjsr305=strict']
-            jvmTarget = '11'
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.addAll("-Xjsr305=strict")
         }
     }
 
@@ -62,7 +64,7 @@ subprojects {
     apply from: "$rootDir/gradle/linters.gradle"
 }
 
-task publishMaven {
+tasks.register('publishMaven') {
     dependsOn ":env-core:publishToSonatype"
     dependsOn ":env-container:publishToSonatype"
     dependsOn ":env-db-db2:publishToSonatype"
