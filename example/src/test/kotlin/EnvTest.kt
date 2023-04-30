@@ -33,6 +33,8 @@ class EnvTest {
 
     @Test
     fun dynamicEnvironment() {
+        System.setProperty(EnvironmentStrategy.SystemPropertyToggle.ENV_FIXED, "false")
+
         sut.up()
 
         sut.systems.forEach { (_, s) -> assertTrue(s.running()) }
