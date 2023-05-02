@@ -12,7 +12,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration.ofSeconds
 
-@Suppress("TooManyFunctions", "unused")
+@Suppress("TooManyFunctions", "SpreadOperator", "unused")
 open class RedisContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
