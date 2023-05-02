@@ -17,6 +17,7 @@ import java.time.Duration
 @Suppress("TooManyFunctions", "unused")
 open class WiremockContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
+    private val externalHost: String = "localhost",
     private val defaultPort: Int = PORT,
     private val afterStart: WiremockContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
@@ -55,7 +56,7 @@ open class WiremockContainerSystem @JvmOverloads constructor(
     override fun start() {
         withClasspathResourceMapping("wiremock", "/home/wiremock", READ_ONLY)
         super.start()
-        config = Config(host, firstMappedPort)
+        config = Config(host, externalHost, firstMappedPort)
         apply(afterStart)
     }
 
@@ -63,10 +64,11 @@ open class WiremockContainerSystem @JvmOverloads constructor(
 
     data class Config @JvmOverloads constructor(
         val host: String = "localhost",
+        val externalHost: String = "localhost",
         val port: Int = PORT
     ) : ExternalSystemConfig(
         "env.wiremock.host" to host,
-        "env.wiremock.external-host" to (if (getenv("CI") == null) host else "host.docker.internal"),
+        "env.wiremock.external-host" to externalHost,
         "env.wiremock.port" to port.toString()
     )
 
