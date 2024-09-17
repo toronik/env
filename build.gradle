@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 buildscript {
     ext.kotlin_version = '1.8.21'
     ext.testContainers_version = '1.18.0'
-    ext.wiremock_version = '2.35.0'
+    ext.wiremock_version = '3.0.1'
     ext.klogging_version = '3.0.5'
-    ext.libVersion = "5.1.1"
+    ext.libVersion = "5.2.0"
     ext.libGroup = 'io.github.adven27'
     repositories {
         mavenCentral()
