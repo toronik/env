@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.common.ClasspathFileSource
 import com.github.tomakehurst.wiremock.common.Json
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
+import com.github.tomakehurst.wiremock.extension.TemplateHelperProviderExtension
 import com.github.tomakehurst.wiremock.recording.RecordSpecBuilder
 import io.github.adven27.env.core.Environment.Companion.findAvailableTcpPort
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
@@ -73,11 +73,14 @@ open class WiremockSystem @JvmOverloads constructor(
         additionalConfiguration: WireMockConfiguration.() -> WireMockConfiguration = { this },
         fixedPort: Int = DEFAULT_PORT
     ) : this(
-        wireMockConfiguration = additionalConfiguration.invoke(
+        wireMockConfiguration = additionalConfiguration(
             wireMockConfig()
                 .usingFilesUnderClasspath("wiremock")
-                .extensions(ResponseTemplateTransformer(true, helpers))
-
+                .extensions(object : TemplateHelperProviderExtension {
+                    override fun getName() = TEMPLATE_HELPER_EXTENSION_NAME
+                    override fun provideTemplateHelpers() = helpers
+                })
+                .globalTemplating(true)
         ),
         defaultPort = fixedPort,
         record = record,
@@ -118,6 +121,8 @@ open class WiremockSystem @JvmOverloads constructor(
     }
 
     companion object {
+        private const val TEMPLATE_HELPER_EXTENSION_NAME = "wiremock-system-template-helper-extension"
+
         private fun configureJsonMapper() {
             Json.getObjectMapper()
                 .configure(USE_BIG_DECIMAL_FOR_FLOATS, true)
