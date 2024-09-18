@@ -1,6 +1,5 @@
 import io.github.adven27.env.core.Environment
 import io.github.adven27.env.core.EnvironmentStrategy
-import io.github.adven27.env.db.mysql.MySqlContainerSystem
 import io.github.adven27.env.db.postgresql.PostgreSqlContainerSystem
 import io.github.adven27.env.grpc.GrpcMockContainerSystem
 import io.github.adven27.env.mq.kafka.KafkaContainerSystem
@@ -52,7 +51,7 @@ class SomeEnvironment : Environment(
     "KAFKA" to KafkaContainerSystem(),
     "RABBIT" to RabbitContainerSystem(),
     "POSTGRES" to PostgreSqlContainerSystem(),
-    //"MYSQL" to MySqlContainerSystem(),
+    // "MYSQL" to MySqlContainerSystem(),
     "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
     },
