@@ -52,7 +52,7 @@ class SomeEnvironment : Environment(
     "KAFKA" to KafkaContainerSystem(),
     "RABBIT" to RabbitContainerSystem(),
     "POSTGRES" to PostgreSqlContainerSystem(),
-    "MYSQL" to MySqlContainerSystem(),
+    //"MYSQL" to MySqlContainerSystem(),
     "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
     },
