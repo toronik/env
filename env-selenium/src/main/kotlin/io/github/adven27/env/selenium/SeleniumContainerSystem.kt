@@ -3,7 +3,6 @@ package io.github.adven27.env.selenium
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils
 import org.testcontainers.utility.DockerImageName
@@ -16,7 +15,7 @@ open class SeleniumContainerSystem @JvmOverloads constructor(
     private val afterStart: SeleniumContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
 
-    companion object : KLogging() {
+    companion object {
         private const val PORT = 4444
         private const val STARTUP_TIMEOUT = 30L
 

@@ -3,7 +3,6 @@ package io.github.adven27.env.db.mssql
 import io.github.adven27.env.container.asCompatibleSubstituteFor
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.MSSQLServerContainer
 import org.testcontainers.utility.DockerImageName
 
@@ -48,7 +47,7 @@ open class MsSqlServerContainerSystem @JvmOverloads constructor(
         PROP_PASSWORD to password,
         PROP_DRIVER to driver
     ) {
-        companion object : KLogging() {
+        companion object {
             const val PROP_URL = "env.db.sqlserver.url"
             const val PROP_USER = "env.db.sqlserver.username"
             const val PROP_PASSWORD = "env.db.sqlserver.password"
@@ -56,7 +55,7 @@ open class MsSqlServerContainerSystem @JvmOverloads constructor(
         }
     }
 
-    companion object : KLogging() {
+    companion object {
         @JvmField
         val DEFAULT_IMAGE: DockerImageName =
             "mcr.microsoft.com/azure-sql-edge" asCompatibleSubstituteFor "mcr.microsoft.com/mssql/server"

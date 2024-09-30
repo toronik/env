@@ -4,12 +4,14 @@ import io.github.adven27.env.core.Environment.Companion.findAvailableTcpPort
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.jar.application.WaitingStrategy.HealthCheckUrl
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import java.io.File
 import java.time.Duration
 import java.time.Duration.ofSeconds
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.locks.ReentrantLock
+
+private val logger = logger {}
 
 @Suppress("SpreadOperator")
 abstract class JarApplication @JvmOverloads constructor(
@@ -74,7 +76,7 @@ abstract class JarApplication @JvmOverloads constructor(
             Config(this.args, this.systemProperties + arrayOf(*properties))
     }
 
-    companion object : KLogging() {
+    companion object {
         val START_TIMEOUT: Duration = ofSeconds(180)
         val STOP_TIMEOUT: Duration = ofSeconds(15)
     }

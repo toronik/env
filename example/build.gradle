@@ -23,7 +23,7 @@ test {
     testLogging.events('FAILED', 'PASSED')
 }
 
-task runEnv(type: JavaExec) {
+tasks.register('runEnv', JavaExec) {
     group = "Execution"
     description = "Run some environment"
     classpath = sourceSets.test.runtimeClasspath

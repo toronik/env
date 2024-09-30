@@ -6,5 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
-    implementation("io.github.crackthecodeabhi:kreds:0.8")
+    implementation("io.github.crackthecodeabhi:kreds:0.9.1")
 }

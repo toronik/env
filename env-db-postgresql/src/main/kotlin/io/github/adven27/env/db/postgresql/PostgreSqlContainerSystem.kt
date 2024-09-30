@@ -3,7 +3,6 @@ package io.github.adven27.env.db.postgresql
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
@@ -56,7 +55,7 @@ open class PostgreSqlContainerSystem @JvmOverloads constructor(
         }
     }
 
-    companion object : KLogging() {
+    companion object {
         @JvmField
         val DEFAULT_IMAGE = "postgres".parseImage()
     }

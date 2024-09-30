@@ -1,0 +1,20 @@
+{
+  "mappings": [
+    {
+      "request": {"url": "/test1", "method": "GET"},
+      "response": {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "jsonBody": {"test": 1}
+      }
+    },
+    {
+      "request": {"url": "/test2", "method": "GET"},
+      "response": {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "bodyFileName": "test.json"
+      }
+    }
+  ]
+}

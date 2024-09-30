@@ -1,6 +1,6 @@
 package io.github.adven27.env.jar.application
 
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URL
@@ -9,6 +9,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
+
+private val logger = logger {}
 
 interface WaitingStrategy {
     fun wait(startupTimeout: Duration, vararg params: Any)
@@ -30,8 +32,6 @@ interface WaitingStrategy {
                 ready = true
             }
         }
-
-        companion object : KLogging()
     }
 
     class HealthCheckUrl(private val basePath: String) : WaitingStrategy {
@@ -81,7 +81,7 @@ interface WaitingStrategy {
             logger.info { "Health check succeed: $this" }
         }.isSuccessful
 
-        companion object : KLogging() {
+        companion object {
             val httpClient = OkHttpClient()
             const val POLL_DELAY_MILLIS = 3000L
         }

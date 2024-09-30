@@ -2,7 +2,7 @@ package io.github.adven27.env.db.oracle
 
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.core.io.support.EncodedResource
 import org.springframework.jdbc.BadSqlGrammarException
@@ -11,6 +11,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource
 import org.springframework.jdbc.datasource.init.ScriptUtils
 import java.net.InetAddress
 import java.sql.SQLSyntaxErrorException
+
+private val logger = logger {}
 
 @Suppress("TooManyFunctions", "LongParameterList", "unused")
 open class OracleTemporarySchemaSystem @JvmOverloads constructor(
@@ -134,7 +136,7 @@ open class OracleTemporarySchemaSystem @JvmOverloads constructor(
 
     private fun connection() = jdbcTemplate.dataSource!!.connection
 
-    companion object : KLogging() {
+    companion object {
         const val STOP_RETRY_DELAY: Long = 3000
 
         fun defaultScheme() = "test_${InetAddress.getLocalHost().hostAddress.replace(".", "_")}"

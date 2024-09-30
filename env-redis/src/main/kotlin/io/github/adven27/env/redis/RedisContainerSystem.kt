@@ -7,7 +7,6 @@ import io.github.crackthecodeabhi.kreds.connection.Endpoint
 import io.github.crackthecodeabhi.kreds.connection.KredsClient
 import io.github.crackthecodeabhi.kreds.connection.newClient
 import kotlinx.coroutines.runBlocking
-import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration.ofSeconds
@@ -78,7 +77,7 @@ open class RedisContainerSystem @JvmOverloads constructor(
     data class Config @JvmOverloads constructor(val host: String = "localhost", val port: Int = PORT) :
         ExternalSystemConfig("env.redis.host" to host, "env.redis.port" to port.toString())
 
-    companion object : KLogging() {
+    companion object {
         private const val PORT = 6379
         private const val STARTUP_TIMEOUT = 30L
 

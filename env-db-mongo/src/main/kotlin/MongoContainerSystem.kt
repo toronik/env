@@ -1,7 +1,6 @@
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 
@@ -51,7 +50,7 @@ open class MongoContainerSystem @JvmOverloads constructor(
         }
     }
 
-    companion object : KLogging() {
+    companion object {
         @JvmField
         val DEFAULT_IMAGE = "mongo".parseImage()
         const val DEFAULT_PORT = 27017

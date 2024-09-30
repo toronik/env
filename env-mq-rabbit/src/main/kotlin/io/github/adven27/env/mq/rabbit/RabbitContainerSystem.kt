@@ -3,7 +3,6 @@ package io.github.adven27.env.mq.rabbit
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.RabbitMQContainer
 import org.testcontainers.utility.DockerImageName
 
@@ -48,7 +47,7 @@ open class RabbitContainerSystem @JvmOverloads constructor(
         }
     }
 
-    companion object : KLogging() {
+    companion object {
         private const val PORT = 5672
         private const val PORT_ADM = 15672
 

@@ -5,7 +5,7 @@ import com.ibm.msg.client.wmq.WMQConstants.WMQ_CM_CLIENT
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.containers.wait.strategy.Wait.forLogMessage
@@ -13,6 +13,8 @@ import org.testcontainers.utility.DockerImageName
 import java.time.Duration.ofSeconds
 import javax.jms.Session
 import javax.jms.Session.AUTO_ACKNOWLEDGE
+
+private val logger = LoggerFactory.getLogger(IbmMQContainerSystem::class.java)
 
 @Suppress("unused", "MagicNumber")
 open class IbmMQContainerSystem @JvmOverloads constructor(
@@ -52,7 +54,7 @@ open class IbmMQContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
 
-    companion object : KLogging() {
+    companion object {
         private const val PORT = 1414
         private const val PORT_ADM = 9443
 
@@ -127,11 +129,11 @@ data class IbmMqConfig @JvmOverloads constructor(
     @Suppress("unused")
     val jmsTester3 = jmsConfig(devQueue3)
 
-    private fun jmsConfig(q: String) = Config(host, port.toInt(), q, manager, channel)
+    private fun jmsConfig(q: String) = Config(host, port, q, manager, channel)
 
     data class Config(val host: String, val port: Int, val queue: String, val manager: String, val channel: String)
 
-    companion object : KLogging() {
+    companion object {
         const val PROP_HOST = "env.mq.ibm.host"
         const val PROP_PORT = "env.mq.ibm.port"
         const val PROP_MANAGER = "env.mq.ibm.manager"

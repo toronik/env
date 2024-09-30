@@ -2,7 +2,6 @@ package io.github.adven27.env.mq.kafka
 
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration.ofSeconds
@@ -40,7 +39,7 @@ open class FastDataDevKafkaContainerSystem @JvmOverloads constructor(
         val port: Int = PORT
     ) : ExternalSystemConfig("env.mq.kafka.host" to host, "env.mq.kafka.port" to port.toString())
 
-    companion object : KLogging() {
+    companion object {
         private const val PORT = 9092
         private const val PORT_ADM = 3030
         private const val IMAGE = "lensesio/fast-data-dev"

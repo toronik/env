@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.common.Json
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.BindMode.READ_ONLY
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
@@ -21,7 +20,7 @@ open class WiremockContainerSystem @JvmOverloads constructor(
     private val afterStart: WiremockContainerSystem.() -> Unit = { }
 ) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
 
-    companion object : KLogging() {
+    companion object {
         private const val PORT = 8080
         private const val STARTUP_TIMEOUT = 30L
 

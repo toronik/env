@@ -1,7 +1,7 @@
 package io.github.adven27.env.core
 
 import io.github.adven27.env.core.Environment.ConfigResolver.FromSystemProperty
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.allOf
 import java.util.concurrent.CompletableFuture.runAsync
@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
+
+private val logger = logger {}
 
 open class Environment @JvmOverloads constructor(
     val systems: Map<String, ExternalSystem>,
@@ -26,12 +28,12 @@ open class Environment @JvmOverloads constructor(
     )
 
     init {
-        logger.info("Environment settings:\nConfig: $config\nSystems:\n${systems.entries.joinToString("\n")}")
+        logger.info { "Environment settings:\nConfig: $config\nSystems:\n${systems.entries.joinToString("\n")}" }
     }
 
     fun up() = this.apply {
         when {
-            config.dryRun -> logger.info("Skip environment starting")
+            config.dryRun -> logger.info { "Skip environment starting" }
             else -> runCatching { tryUp() }.onFailure { down() }.getOrThrow()
         }
     }
@@ -41,9 +43,9 @@ open class Environment @JvmOverloads constructor(
         try {
             val futures = start(systems.entries, config.envStrategy.fixedEnv())
             val elapsed = measureTimeMillis { allOf(*futures)[config.upTimeout, SECONDS] }
-            logger.info(summary(futures.associate { it.get() }), elapsed)
+            logger.info { summary(futures.associate { it.get() }).format(elapsed) }
         } catch (e: TimeoutException) {
-            logger.error("Startup timeout exceeded (${config.upTimeout}s). ${status()}", e)
+            logger.error(e) { "Startup timeout exceeded (${config.upTimeout}s). ${status()}" }
             throw StartupFail(e)
         }
     }
@@ -57,7 +59,7 @@ open class Environment @JvmOverloads constructor(
         if (!config.dryRun) {
             allOf(
                 *systems.map { (name, system) ->
-                    runAsync { runCatching { system.stop() }.onFailure { logger.error("Failed to stop $name", it) } }
+                    runAsync { runCatching { system.stop() }.onFailure { logger.error(it) { "Failed to stop $name" } } }
                 }.toTypedArray()
             )[config.downTimeout, SECONDS]
         }
@@ -72,11 +74,11 @@ open class Environment @JvmOverloads constructor(
         allOf(
             *this.systems.entries
                 .filter { systems.any { s: String -> it.key.startsWith(s, ignoreCase = true) } }
-                .onEach { logger.info(logDesc, it.key) }
+                .onEach { logger.info { logDesc.format(it.key) } }
                 .map { it.value }
                 .map { runAsync { operation(it) } }
                 .toTypedArray()
-        ).thenRun { logger.info("Done. ${status()}") }[timeout, SECONDS]
+        ).thenRun { logger.info { "Done. ${status()}" } }[timeout, SECONDS]
     }
 
     fun status() =
@@ -92,13 +94,13 @@ open class Environment @JvmOverloads constructor(
     inline fun <reified T : ExternalSystem> env() = systems.values.filterIsInstance<T>().singleOrNull()
         ?: error("System ${T::class} not found")
 
-    companion object : KLogging() {
+    companion object {
         private fun start(
             systems: Set<Map.Entry<String, ExternalSystem>>,
             fixedEnv: Boolean
         ): Array<CompletableFuture<Pair<String, Long>>> =
             systems
-                .onEach { logger.info("Preparing to start {}", it.key) }
+                .onEach { logger.info { "Preparing to start ${it.key}" } }
                 .map {
                     supplyAsync(
                         { it.key to measureTimeMillis { it.value.start(fixedEnv) } },
@@ -116,11 +118,14 @@ open class Environment @JvmOverloads constructor(
         fun String.fromPropertyOrElse(orElse: Long) = System.getProperty(this, orElse.toString()).toLong()
 
         @JvmStatic
+        fun String.property() = System.getProperty(this)
+
+        @JvmStatic
         fun String.fromPropertyOrElse(orElse: Boolean) = System.getProperty(this, orElse.toString()).toBoolean()
 
         @JvmStatic
         fun Map<String, String>.propagateToSystemProperties() = forEach { (p, v) ->
-            System.setProperty(p, v).also { logger.info("Set system property: $p = ${System.getProperty(p)}") }
+            System.setProperty(p, v).also { logger.info { "Set system property: $p = ${System.getProperty(p)}" } }
         }
     }
 

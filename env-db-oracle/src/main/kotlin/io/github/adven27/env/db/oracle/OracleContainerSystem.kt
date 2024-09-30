@@ -3,7 +3,6 @@ package io.github.adven27.env.db.oracle
 import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.containers.OracleContainer
 import org.testcontainers.utility.DockerImageName
 
@@ -57,7 +56,7 @@ open class OracleContainerSystem @JvmOverloads constructor(
         }
     }
 
-    companion object : KLogging() {
+    companion object {
         private const val PORT = 1521
 
         @JvmField

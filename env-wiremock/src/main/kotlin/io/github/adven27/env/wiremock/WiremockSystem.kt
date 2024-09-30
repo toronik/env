@@ -2,8 +2,8 @@ package io.github.adven27.env.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.common.ClasspathFileSource
 import com.github.tomakehurst.wiremock.common.Json
+import com.github.tomakehurst.wiremock.common.SingleRootFileSource
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.extension.TemplateHelperProviderExtension
@@ -14,10 +14,13 @@ import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.core.GenericExternalSystem
 import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.DEFAULT_PORT
 import io.github.adven27.env.wiremock.WiremockSystem.Config.Companion.PROP_PORT
+import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style.c
 import wiremock.com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN
 import wiremock.com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
 import wiremock.com.github.jknack.handlebars.Helper
+import java.io.File
 import java.util.concurrent.atomic.AtomicReference
+
 
 open class WiremockSystem @JvmOverloads constructor(
     private val wireMockConfiguration: WireMockConfiguration,
@@ -44,7 +47,12 @@ open class WiremockSystem @JvmOverloads constructor(
             configureJsonMapper()
             start()
             record?.let {
-                enableRecordMappings(ClasspathFileSource("wiremock/mappings"), ClasspathFileSource("wiremock/__files"))
+                val path = wireMockConfiguration.filesRoot().path
+                val mappingsPath = "src/test/resources/$path/mappings"
+                val filesPath = "src/test/resources/$path/__files"
+                File(mappingsPath).mkdirs()
+                File(filesPath).mkdirs()
+                enableRecordMappings(SingleRootFileSource(mappingsPath), SingleRootFileSource(filesPath))
                 startRecording(it)
             }
             afterStart()

@@ -6,5 +6,4 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
-    api "org.testcontainers:rabbitmq:$testContainers_version"
 }

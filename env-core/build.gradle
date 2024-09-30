@@ -5,5 +5,5 @@ plugins {
 apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
-    api "io.github.microutils:kotlin-logging:$klogging_version"
+    api "io.github.oshai:kotlin-logging:$klogging_version"
 }

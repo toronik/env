@@ -1,7 +1,6 @@
 import io.github.adven27.env.container.asCompatibleSubstituteFor
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
-import mu.KLogging
 import org.testcontainers.elasticsearch.ElasticsearchContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration.ofSeconds
@@ -62,7 +61,7 @@ open class ElasticContainerSystem @JvmOverloads constructor(
         )
     }
 
-    companion object : KLogging() {
+    companion object {
         private const val DEFAULT_PORT = 9200
         private const val DEFAULT_USER = "elastic"
         private const val STARTUP_TIMEOUT = 30L

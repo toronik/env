@@ -6,6 +6,6 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-core')
-    runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.2.0.0")
-    implementation('org.springframework:spring-jdbc:6.0.8')
+    runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.5.0.24.07")
+    implementation('org.springframework:spring-jdbc:6.1.13')
 }

@@ -10,6 +10,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.output.Slf4jLogConsumer
 
 private const val PG_URL = "jdbc:postgresql://localhost:5432/test?loggerLevel=OFF"
@@ -47,11 +49,12 @@ class EnvTest {
     }
 }
 
+val logger: Logger = LoggerFactory.getLogger("EnvTest")
+
 class SomeEnvironment : Environment(
     "KAFKA" to KafkaContainerSystem(),
     "RABBIT" to RabbitContainerSystem(),
     "POSTGRES" to PostgreSqlContainerSystem(),
-    // "MYSQL" to MySqlContainerSystem(),
     "GRPC" to GrpcMockContainerSystem(1, listOf("common.proto", "wallet.proto")).apply {
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("GRPC-$serviceId"))
     },
