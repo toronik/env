@@ -21,19 +21,8 @@ open class LocalStackContainerSystem @JvmOverloads constructor(
     private val startServices: LocalStackContainerSystem.(Set<Service>) -> Map<String, String> = { s ->
         s.fold(mapOf()) { props, service ->
             props + when (service) {
-                S3 -> "test".let {
-                    execInContainer(AWSLOCAL, S3.localStackName, "mb", "s3://$it")
-                    execInContainer(
-                        AWSLOCAL, S3.localStackName, "cp", S3_DIR, "s3://$it", "--recursive", "--include", "'*'"
-                    )
-                    mapOf("$PREFIX${S3.localStackName}.bucket" to it)
-                }
-
-                SQS -> "test".let {
-                    execInContainer(AWSLOCAL, SQS.localStackName, "create-queue", "--queue-name", it)
-                    mapOf("$PREFIX${SQS.localStackName}.queue" to it)
-                }
-
+                S3 -> createBucket("test")
+                SQS -> createQueue("test")
                 else -> mapOf()
             }
         }
@@ -55,6 +44,7 @@ open class LocalStackContainerSystem @JvmOverloads constructor(
         start()
     }
 
+    @Suppress("SpreadOperator")
     override fun start() {
         withServices(*services.toTypedArray())
         withClasspathResourceMapping("s3", S3_DIR, READ_ONLY)
@@ -101,11 +91,22 @@ open class LocalStackContainerSystem @JvmOverloads constructor(
         }
     }
 
+    protected open fun createBucket(name: String): Map<String, String> {
+        execInContainer(AWSLOCAL, S3.localStackName, "mb", "s3://$name")
+        execInContainer(AWSLOCAL, S3.localStackName, "cp", S3_DIR, "s3://$name", "--recursive", "--include", "'*'")
+        return mapOf("$PREFIX${S3.localStackName}.bucket" to name)
+    }
+
+    protected open fun createQueue(name: String): Map<String, String> {
+        execInContainer(AWSLOCAL, SQS.localStackName, "create-queue", "--queue-name", name)
+        return mapOf("$PREFIX${SQS.localStackName}.queue" to name)
+    }
+
     companion object {
         @JvmField
         val DEFAULT_IMAGE = "localstack/localstack".parseImage()
         const val DEFAULT_PORT = 27017
-        public const val AWSLOCAL = "awslocal"
+        const val AWSLOCAL = "awslocal"
         private const val S3_DIR = "/home/test/s3"
     }
 }
