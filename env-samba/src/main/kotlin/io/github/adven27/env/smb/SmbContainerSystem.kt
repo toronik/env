@@ -33,6 +33,7 @@ open class SmbContainerSystem(
         afterStart = afterStart
     )
 
+    @Suppress("SpreadOperator")
     override fun start(fixedEnv: Boolean) {
         withLogConsumer(Slf4jLogConsumer(logger).withPrefix("SMB"))
         withCommand("-u", "$USER;$PASS", "-s", "$share;$containerDir;yes;no;no;all")
