@@ -18,6 +18,7 @@ import wiremock.com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMA
 import wiremock.com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
 import wiremock.com.github.jknack.handlebars.Helper
 import java.io.File
+import java.time.ZoneId
 import java.util.concurrent.atomic.AtomicReference
 
 open class WiremockSystem @JvmOverloads constructor(
@@ -107,12 +108,19 @@ open class WiremockSystem @JvmOverloads constructor(
     }
 
     fun interactions() = client.serveEvents.sortedBy { it.request.loggedDate }
-        .map { Interaction(it.request.url, it.request.bodyAsString, it.response.bodyAsString) }
+        .map {
+            Interaction(
+                it.request.method.value(),
+                it.request.url,
+                it.request.bodyAsString,
+                it.response.bodyAsString,
+                it.request.loggedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                it.response.status
+            )
+        }
 
     fun popInteractions() = interactions().also { cleanInteractions() }
     fun cleanInteractions() = client.resetRequests()
-
-    data class Interaction(val url: String, val req: String, val resp: String)
 
     data class Config(val host: String = DEFAULT_HOST, val port: Int = DEFAULT_PORT) : ExternalSystemConfig(
         PROP_PORT to port.toString(),

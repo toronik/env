@@ -11,6 +11,7 @@ import org.testcontainers.utility.DockerImageName
 import wiremock.com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN
 import wiremock.com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
 import java.time.Duration
+import java.time.ZoneId
 
 @Suppress("TooManyFunctions", "unused")
 open class WiremockContainerSystem @JvmOverloads constructor(
@@ -71,10 +72,17 @@ open class WiremockContainerSystem @JvmOverloads constructor(
     )
 
     fun interactions() = client.serveEvents.sortedBy { it.request.loggedDate }
-        .map { Interaction(it.request.url, it.request.bodyAsString, it.response.bodyAsString) }
+        .map {
+            Interaction(
+                it.request.method.value(),
+                it.request.url,
+                it.request.bodyAsString,
+                it.response.bodyAsString,
+                it.request.loggedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                it.response.status
+            )
+        }
 
     fun popInteractions() = interactions().also { cleanInteractions() }
     fun cleanInteractions() = client.resetRequests()
-
-    data class Interaction(val url: String, val req: String, val resp: String)
 }
