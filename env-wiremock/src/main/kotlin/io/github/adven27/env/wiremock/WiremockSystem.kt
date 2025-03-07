@@ -110,12 +110,14 @@ open class WiremockSystem @JvmOverloads constructor(
     fun interactions() = client.serveEvents.sortedBy { it.request.loggedDate }
         .map {
             Interaction(
-                it.request.method.value(),
-                it.request.url,
-                it.request.bodyAsString,
-                it.response.bodyAsString,
-                it.request.loggedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                it.response.status
+                method = it.request.method.value(),
+                url = it.request.url,
+                req = it.request.bodyAsString,
+                reqHeaders = it.request.headers.all().associate { h -> h.key() to h.values().joinToString(",") },
+                resp = it.response.bodyAsString,
+                respHeaders = it.response.headers.all().associate { h -> h.key() to h.values().joinToString(",") },
+                date = it.request.loggedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                status = it.response.status
             )
         }
 

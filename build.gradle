@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 buildscript {
     ext.kotlin_version = '2.1.10'
-    ext.testContainers_version = '1.20.4'
-    ext.wiremock_version = '3.12.0'
+    ext.testContainers_version = '1.20.6'
+    ext.wiremock_version = '3.12.1'
     ext.klogging_version = '7.0.0'
     ext.libVersion = "5.5.1"
     ext.libGroup = 'io.github.adven27'
