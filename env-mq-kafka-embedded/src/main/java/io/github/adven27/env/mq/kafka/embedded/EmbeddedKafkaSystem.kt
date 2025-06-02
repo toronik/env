@@ -74,5 +74,3 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
             }
     }
 }
-
-
