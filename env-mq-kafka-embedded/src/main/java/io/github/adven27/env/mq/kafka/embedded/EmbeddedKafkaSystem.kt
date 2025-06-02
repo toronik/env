@@ -4,6 +4,7 @@ import io.github.adven27.env.core.Environment
 import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.core.GenericExternalSystem
 import org.springframework.kafka.test.EmbeddedKafkaBroker
+import org.springframework.kafka.test.EmbeddedKafkaZKBroker
 
 @Suppress("unused")
 open class EmbeddedKafkaSystem @JvmOverloads constructor(
@@ -25,7 +26,7 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
         Config(bootstrapServers)
     },
     stop = { embeddedKafka.destroy() },
-    running = { System.getProperty(EmbeddedKafkaBroker.SPRING_EMBEDDED_ZOOKEEPER_CONNECT) != null }
+    running = { System.getProperty(EmbeddedKafkaBroker.SPRING_EMBEDDED_KAFKA_BROKERS) != null }
 ) {
 
     @Suppress("SpreadOperator")
@@ -35,7 +36,7 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
         advertisedHost: String? = null,
         defaultPort: Int = DEFAULT_KAFKA_PORT
     ) : this(
-        EmbeddedKafkaBroker(
+        EmbeddedKafkaZKBroker(
             NUMBER_OF_BROKERS,
             CONTROLLED_SHUTDOWN,
             NUMBER_OF_PARTITIONS,
@@ -73,3 +74,5 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
             }
     }
 }
+
+
