@@ -1,14 +1,16 @@
 package io.github.adven27.env.mq.kafka.embedded
 
 import io.github.adven27.env.core.Environment.Companion.propagateToSystemProperties
+import io.github.adven27.env.core.ExternalSystem
 
 @Suppress("unused")
 open class StreamKafkaEmbedded @JvmOverloads constructor(
+    private val original: EmbeddedKafkaSystem,
     val topicSource: String = "in",
     val topicSink: String = "out",
     val topicDlq: String = "dlq",
     val group: String = "group"
-) : EmbeddedKafkaSystem() {
+) : ExternalSystem by original {
 
     private val properties =
         mapOf(
