@@ -31,7 +31,7 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
 
     @Suppress("SpreadOperator")
     constructor(
-        topics: Array<String>,
+        topics: Array<String> = emptyArray(),
         properties: MutableMap<String, String> = mutableMapOf(),
         advertisedHost: String? = null,
         defaultPort: Int = DEFAULT_KAFKA_PORT

@@ -12,6 +12,9 @@ open class StreamKafkaEmbedded @JvmOverloads constructor(
     val group: String = "group"
 ) : ExternalSystem by original {
 
+    override val config: EmbeddedKafkaSystem.Config
+        get() = original.config
+
     private val properties =
         mapOf(
             PROP_TOPIC_SOURCE to topicSource,
