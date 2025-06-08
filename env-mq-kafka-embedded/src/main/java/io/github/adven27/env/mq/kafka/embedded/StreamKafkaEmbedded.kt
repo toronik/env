@@ -5,7 +5,7 @@ import io.github.adven27.env.core.ExternalSystem
 
 @Suppress("unused")
 open class StreamKafkaEmbedded @JvmOverloads constructor(
-    private val original: EmbeddedKafkaSystem,
+    private val original: EmbeddedKafkaSystem = EmbeddedKafkaSystem(),
     val topicSource: String = "in",
     val topicSink: String = "out",
     val topicDlq: String = "dlq",
