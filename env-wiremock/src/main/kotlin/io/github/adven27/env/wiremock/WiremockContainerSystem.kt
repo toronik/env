@@ -77,9 +77,11 @@ open class WiremockContainerSystem @JvmOverloads constructor(
                 method = it.request.method.value(),
                 url = it.request.url,
                 req = it.request.bodyAsString,
-                reqHeaders = it.request.headers.all().associate { h -> h.key() to h.values().joinToString(",") },
+                reqHeaders = it.request.headers?.all()?.associate { h -> h.key() to h.values().joinToString(",") }
+                    ?: emptyMap(),
                 resp = it.response.bodyAsString,
-                respHeaders = it.response.headers.all().associate { h -> h.key() to h.values().joinToString(",") },
+                respHeaders = it.response.headers?.all()?.associate { h -> h.key() to h.values().joinToString(",") }
+                    ?: emptyMap(),
                 date = it.request.loggedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
                 status = it.response.status
             )
