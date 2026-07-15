@@ -74,6 +74,6 @@ open class KafkaContainerSystem @JvmOverloads constructor(
 
     companion object {
         @JvmField
-        val DEFAULT_IMAGE: DockerImageName = "confluentinc/cp-kafka".parseImage()
+        val DEFAULT_IMAGE: DockerImageName = "confluentinc/cp-kafka:7.5.0".parseImage()
     }
 }
