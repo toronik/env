@@ -6,6 +6,6 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
-    api "org.testcontainers:testcontainers-postgresql:$testContainers_version"
+    api "org.testcontainers:postgresql:$testContainers_version"
     testImplementation "org.postgresql:postgresql:42.7.8"
 }
