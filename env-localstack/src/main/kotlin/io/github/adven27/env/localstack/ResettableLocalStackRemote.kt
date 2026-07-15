@@ -2,6 +2,7 @@ package io.github.adven27.env.localstack
 
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
+import io.github.adven27.env.core.shouldReset
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -17,8 +18,6 @@ import java.net.URI
 
 @Suppress("unused")
 fun resettableLocalStack(props: Map<String, String>): ExternalSystem = ResettableLocalStackRemote(props)
-
-private fun shouldReset() = System.getProperty("SPECS_SUT_START")?.toBoolean() != false
 
 private class ResettableLocalStackRemote(private val props: Map<String, String>) : ExternalSystem {
     override val config: ExternalSystemConfig = ExternalSystemConfig(props)

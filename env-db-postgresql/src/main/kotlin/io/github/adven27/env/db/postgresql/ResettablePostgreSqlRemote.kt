@@ -2,12 +2,11 @@ package io.github.adven27.env.db.postgresql
 
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
+import io.github.adven27.env.core.shouldReset
 import java.sql.DriverManager
 
 @Suppress("unused")
 fun resettablePostgres(props: Map<String, String>): ExternalSystem = ResettablePostgreSqlRemote(props)
-
-private fun shouldReset() = System.getProperty("SPECS_SUT_START")?.toBoolean() != false
 
 private class ResettablePostgreSqlRemote(private val props: Map<String, String>) : ExternalSystem {
     override val config: ExternalSystemConfig = ExternalSystemConfig(props)

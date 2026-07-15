@@ -2,14 +2,13 @@ package io.github.adven27.env.redis
 
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
+import io.github.adven27.env.core.shouldReset
 import io.github.crackthecodeabhi.kreds.connection.Endpoint
 import io.github.crackthecodeabhi.kreds.connection.newClient
 import kotlinx.coroutines.runBlocking
 
 @Suppress("unused")
 fun resettableRedis(props: Map<String, String>): ExternalSystem = ResettableRedisRemote(props)
-
-private fun shouldReset() = System.getProperty("SPECS_SUT_START")?.toBoolean() != false
 
 private class ResettableRedisRemote(private val props: Map<String, String>) : ExternalSystem {
     override val config: ExternalSystemConfig = ExternalSystemConfig(props)
