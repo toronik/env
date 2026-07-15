@@ -6,6 +6,12 @@ import java.util.function.Consumer
 import java.util.function.Function
 
 /**
+ * Returns true when the environment should reset (drop + recreate) its state on start.
+ * Reset is performed unless the system property SPECS_SUT_START is explicitly set to "false".
+ */
+fun shouldReset(): Boolean = System.getProperty("SPECS_SUT_START")?.toBoolean() != false
+
+/**
  * Object responsible for managing external system abstraction
  */
 interface ExternalSystem {
