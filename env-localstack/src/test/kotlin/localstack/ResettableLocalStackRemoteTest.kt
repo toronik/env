@@ -14,6 +14,7 @@ import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 
@@ -54,7 +55,7 @@ class ResettableLocalStackRemoteTest {
     }
 
     @Test
-    fun `start with reset gate unset recreates bucket so it is empty`() {
+    fun `start with reset gate unset bulk-empties existing bucket`() {
         System.clearProperty("SPECS_SUT_START") // gate absent → shouldReset = true
 
         val endpoint = localstack.getEndpointOverride(LocalStackContainer.Service.S3).toString()
@@ -71,11 +72,38 @@ class ResettableLocalStackRemoteTest {
 
         assertTrue(system.running())
 
-        // Bucket should exist and be empty
+        // Bucket must exist and be empty (objects deleted, bucket preserved)
         val objects = s3.listObjectsV2(
             ListObjectsV2Request.builder().bucket(TEST_BUCKET).build()
         )
         assertEquals("bucket should be empty after reset", 0, objects.contents().size)
+        // Verify the bucket still exists (not deleted)
+        s3.headBucket(HeadBucketRequest.builder().bucket(TEST_BUCKET).build()) // throws if missing
+    }
+
+    @Test
+    fun `start with reset gate unset creates bucket when it does not exist yet`() {
+        System.clearProperty("SPECS_SUT_START") // gate absent → shouldReset = true
+
+        val freshBucket = "first-run-bucket"
+        val endpoint = localstack.getEndpointOverride(LocalStackContainer.Service.S3).toString()
+        val props = mapOf(
+            "env.aws.s3.endpoint" to endpoint,
+            "env.aws.region" to "us-east-1",
+            "env.aws.access-key" to "test",
+            "env.aws.secret-key" to "test",
+            "env.aws.s3.bucket" to freshBucket
+        )
+
+        val system = resettableLocalStack(props)
+        system.start(false)
+
+        // Bucket must now exist and be empty (created on first run)
+        s3.headBucket(HeadBucketRequest.builder().bucket(freshBucket).build()) // throws if missing
+        val objects = s3.listObjectsV2(
+            ListObjectsV2Request.builder().bucket(freshBucket).build()
+        )
+        assertEquals("freshly created bucket should have 0 objects", 0, objects.contents().size)
     }
 
     @Test

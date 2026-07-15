@@ -7,12 +7,12 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.BucketAlreadyExistsException
+import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
 import software.amazon.awssdk.services.s3.model.Delete
-import software.amazon.awssdk.services.s3.model.DeleteBucketRequest
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
-import software.amazon.awssdk.services.s3.model.NoSuchBucketException
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier
 import java.net.URI
 
@@ -41,8 +41,7 @@ private class ResettableLocalStackRemote(private val props: Map<String, String>)
             .build()
 
         s3.use { client ->
-            emptyAndDeleteBucket(client, bucket)
-            client.createBucket(CreateBucketRequest.builder().bucket(bucket).build())
+            ensureBucketEmpty(client, bucket)
         }
     }
 
@@ -50,33 +49,37 @@ private class ResettableLocalStackRemote(private val props: Map<String, String>)
 
     override fun running() = true
 
-    private fun emptyAndDeleteBucket(s3: S3Client, bucket: String) {
+    private fun ensureBucketEmpty(s3: S3Client, bucket: String) {
+        // Ensure the bucket exists — create only if missing (idempotent on first run)
         try {
-            var continuationToken: String? = null
-            do {
-                val request = ListObjectsV2Request.builder()
-                    .bucket(bucket)
-                    .also { b -> continuationToken?.let { b.continuationToken(it) } }
-                    .build()
-                val response = s3.listObjectsV2(request)
-                val objects = response.contents()
-                if (objects.isNotEmpty()) {
-                    val identifiers = objects.map {
-                        ObjectIdentifier.builder().key(it.key()).build()
-                    }
-                    s3.deleteObjects(
-                        DeleteObjectsRequest.builder()
-                            .bucket(bucket)
-                            .delete(Delete.builder().objects(identifiers).build())
-                            .build()
-                    )
-                }
-                continuationToken = if (response.isTruncated == true) response.nextContinuationToken() else null
-            } while (continuationToken != null)
-
-            s3.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build())
-        } catch (e: NoSuchBucketException) {
-            // Bucket doesn't exist yet — nothing to delete
+            s3.createBucket(CreateBucketRequest.builder().bucket(bucket).build())
+        } catch (_: BucketAlreadyOwnedByYouException) {
+            // Already exists — proceed to empty
+        } catch (_: BucketAlreadyExistsException) {
+            // Already exists — proceed to empty
         }
+
+        // Bulk-empty: one deleteObjects call per page
+        var continuationToken: String? = null
+        do {
+            val request = ListObjectsV2Request.builder()
+                .bucket(bucket)
+                .also { b -> continuationToken?.let { b.continuationToken(it) } }
+                .build()
+            val response = s3.listObjectsV2(request)
+            val objects = response.contents()
+            if (objects.isNotEmpty()) {
+                val identifiers = objects.map {
+                    ObjectIdentifier.builder().key(it.key()).build()
+                }
+                s3.deleteObjects(
+                    DeleteObjectsRequest.builder()
+                        .bucket(bucket)
+                        .delete(Delete.builder().objects(identifiers).build())
+                        .build()
+                )
+            }
+            continuationToken = if (response.isTruncated == true) response.nextContinuationToken() else null
+        } while (continuationToken != null)
     }
 }
