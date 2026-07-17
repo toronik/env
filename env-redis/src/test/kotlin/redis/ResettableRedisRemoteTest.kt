@@ -1,5 +1,6 @@
 package redis
 
+import io.github.adven27.env.redis.Cleanable
 import io.github.adven27.env.redis.resettableRedis
 import io.github.crackthecodeabhi.kreds.connection.Endpoint
 import io.github.crackthecodeabhi.kreds.connection.newClient
@@ -7,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.testcontainers.containers.GenericContainer
@@ -93,6 +95,53 @@ class ResettableRedisRemoteTest {
             runBlocking {
                 cl.select(TARGET_DB.toULong())
                 assertEquals("should_be_flushed", cl.get("existing_key"))
+            }
+        }
+    }
+
+    @Test
+    fun `resettable redis implements Cleanable and clean flushes only its db`() {
+        // Regression for #4: spec authors call env<Cleanable>().clean() in @BeforeExample.
+        // ResettableRedisRemote must implement Cleanable and flush only its logical DB (not all DBs).
+        System.clearProperty("SPECS_SUT_START")
+
+        val host = redis.host
+        val port = redis.firstMappedPort
+
+        val props = mapOf(
+            "env.redis.host" to host,
+            "env.redis.port" to port.toString(),
+            "env.redis.database" to TARGET_DB.toString()
+        )
+
+        val system = resettableRedis(props)
+        system.start(false)
+
+        // Seed: add keys to both the target DB and db 0 after start
+        newClient(Endpoint.from("$host:$port")).use { cl ->
+            runBlocking {
+                cl.select(0UL)
+                cl.set("db0_after_start", "must_survive")
+                cl.select(TARGET_DB.toULong())
+                cl.set("target_key", "will_be_cleaned")
+            }
+        }
+
+        // system must implement Cleanable
+        assertTrue("ResettableRedisRemote must implement Cleanable", system is Cleanable)
+
+        // Call clean() via the Cleanable interface
+        (system as Cleanable).clean()
+
+        newClient(Endpoint.from("$host:$port")).use { cl ->
+            runBlocking {
+                // db 0 must be untouched
+                cl.select(0UL)
+                assertEquals("db 0 must survive clean()", "must_survive", cl.get("db0_after_start"))
+
+                // target DB must be empty (clean flushes its db only)
+                cl.select(TARGET_DB.toULong())
+                assertNull("target_key must be gone after clean()", cl.get("target_key"))
             }
         }
     }

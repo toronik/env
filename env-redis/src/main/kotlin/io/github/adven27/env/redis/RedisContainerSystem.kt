@@ -16,7 +16,7 @@ open class RedisContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
     private val afterStart: RedisContainerSystem.() -> Unit = { }
-) : GenericContainer<Nothing>(dockerImageName), ExternalSystem {
+) : GenericContainer<Nothing>(dockerImageName), ExternalSystem, Cleanable {
     override lateinit var config: Config
 
     private val client: KredsClient by lazy { newClient(Endpoint.from("""${config.host}:${config.port}""")) }
@@ -54,7 +54,7 @@ open class RedisContainerSystem @JvmOverloads constructor(
         }
     }
 
-    fun clean(): String = exec { runBlocking { it.flushAll() } }
+    override fun clean(): String = exec { runBlocking { it.flushAll() } }
 
     fun type(key: String): String = exec { runBlocking { it.type(key) } }
     fun del(vararg keys: String) = exec { runBlocking { it.del(*keys) } }

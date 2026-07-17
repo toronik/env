@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 @Suppress("unused")
 fun resettableRedis(props: Map<String, String>): ExternalSystem = ResettableRedisRemote(props)
 
-private class ResettableRedisRemote(private val props: Map<String, String>) : ExternalSystem {
+private class ResettableRedisRemote(private val props: Map<String, String>) : ExternalSystem, Cleanable {
     override val config: ExternalSystemConfig = ExternalSystemConfig(props)
 
     override fun start(fixedEnv: Boolean) {
@@ -34,4 +34,15 @@ private class ResettableRedisRemote(private val props: Map<String, String>) : Ex
     override fun stop() = Unit
 
     override fun running() = true
+
+    /**
+     * Flushes only the namespaced logical database configured for this remote system.
+     * Safe to call in [@BeforeExample] — does NOT flush other logical databases.
+     */
+    override fun clean(): Any = newClient(Endpoint.from("${props.getValue("env.redis.host")}:${props.getValue("env.redis.port")}")).use { cl ->
+        runBlocking {
+            cl.select(props.getValue("env.redis.database").toULong())
+            cl.flushDb()
+        }
+    }
 }

@@ -2,6 +2,7 @@ package redis
 
 import io.github.adven27.env.core.Environment
 import io.github.adven27.env.core.EnvironmentStrategy
+import io.github.adven27.env.redis.Cleanable
 import io.github.adven27.env.redis.RedisContainerSystem
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -49,6 +50,10 @@ class RedisContainerSystemTest {
             assertEquals(false, exists("k"))
             clean()
             assertEquals(0, exists("k", "map", "list"))
+
+            // Verify RedisContainerSystem implements Cleanable (mode-agnostic contract)
+            assertTrue("RedisContainerSystem must implement Cleanable", this is Cleanable)
+            (this as Cleanable).clean()
         }
     }
 
