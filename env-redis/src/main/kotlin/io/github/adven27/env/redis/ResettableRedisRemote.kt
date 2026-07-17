@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 @Suppress("unused")
 fun resettableRedis(props: Map<String, String>): ExternalSystem = ResettableRedisRemote(props)
 
-private class ResettableRedisRemote(private val props: Map<String, String>) : ExternalSystem, Cleanable {
+private class ResettableRedisRemote(private val props: Map<String, String>) : RedisSystem {
     override val config: ExternalSystemConfig = ExternalSystemConfig(props)
 
     override fun start(fixedEnv: Boolean) {

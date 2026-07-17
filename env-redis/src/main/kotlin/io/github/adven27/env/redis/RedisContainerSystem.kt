@@ -1,7 +1,6 @@
 package io.github.adven27.env.redis
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.crackthecodeabhi.kreds.connection.Endpoint
 import io.github.crackthecodeabhi.kreds.connection.KredsClient
@@ -16,7 +15,7 @@ open class RedisContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = PORT,
     private val afterStart: RedisContainerSystem.() -> Unit = { }
-) : GenericContainer<Nothing>(dockerImageName), ExternalSystem, Cleanable {
+) : GenericContainer<Nothing>(dockerImageName), RedisSystem {
     override lateinit var config: Config
 
     private val client: KredsClient by lazy { newClient(Endpoint.from("""${config.host}:${config.port}""")) }

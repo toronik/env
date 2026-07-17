@@ -1,6 +1,6 @@
 package redis
 
-import io.github.adven27.env.redis.Cleanable
+import io.github.adven27.env.redis.RedisSystem
 import io.github.adven27.env.redis.resettableRedis
 import io.github.crackthecodeabhi.kreds.connection.Endpoint
 import io.github.crackthecodeabhi.kreds.connection.newClient
@@ -127,11 +127,11 @@ class ResettableRedisRemoteTest {
             }
         }
 
-        // system must implement Cleanable
-        assertTrue("ResettableRedisRemote must implement Cleanable", system is Cleanable)
+        // system must implement RedisSystem
+        assertTrue("ResettableRedisRemote must implement RedisSystem", system is RedisSystem)
 
-        // Call clean() via the Cleanable interface
-        (system as Cleanable).clean()
+        // Call clean() via the RedisSystem interface
+        (system as RedisSystem).clean()
 
         newClient(Endpoint.from("$host:$port")).use { cl ->
             runBlocking {
