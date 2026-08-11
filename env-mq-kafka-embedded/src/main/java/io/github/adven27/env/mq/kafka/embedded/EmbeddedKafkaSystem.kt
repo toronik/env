@@ -4,7 +4,7 @@ import io.github.adven27.env.core.Environment
 import io.github.adven27.env.core.ExternalSystemConfig
 import io.github.adven27.env.core.GenericExternalSystem
 import org.springframework.kafka.test.EmbeddedKafkaBroker
-import org.springframework.kafka.test.EmbeddedKafkaZKBroker
+import org.springframework.kafka.test.EmbeddedKafkaKraftBroker
 
 @Suppress("unused")
 open class EmbeddedKafkaSystem @JvmOverloads constructor(
@@ -14,16 +14,29 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
 ) : GenericExternalSystem<EmbeddedKafkaBroker, EmbeddedKafkaSystem.Config>(
     system = embeddedKafka,
     start = { fixedEnv, system ->
+        val kraft = system is EmbeddedKafkaKraftBroker
+        require(!kraft || advertisedHost == null) {
+            "advertisedHost is not supported by the embedded KRaft broker: KafkaClusterTestKit binds its own " +
+                "listeners and an override changes the advertised address only. " +
+                "Use the containerized Kafka (env-mq-kafka) to reach a broker from outside the JVM."
+        }
+        if (kraft && fixedEnv) {
+            throw UnsupportedOperationException(
+                "Fixed port is not supported by the embedded KRaft broker: KafkaClusterTestKit binds its sockets " +
+                    "before it is told which ports to use, so the requested $defaultPort is ignored. " +
+                    "Run a dynamic environment and take the address from ${Config.PROP_BOOTSTRAPSERVERS}, " +
+                    "or use the containerized Kafka (env-mq-kafka), which does keep a fixed port."
+            )
+        }
         val port = if (fixedEnv) defaultPort else Environment.findAvailableTcpPort()
-        var bootstrapServers = "localhost:$port"
-        advertisedHost?.let {
-            advertisedListener(it, port).also { (broker, props) ->
+        val advertised = advertisedHost?.let { host ->
+            advertisedListener(host, port).let { (remote, props) ->
                 system.brokerProperties(props)
-                bootstrapServers += ", $broker"
+                remote
             }
         }
         system.kafkaPorts(port).afterPropertiesSet()
-        Config(bootstrapServers)
+        Config(listOfNotNull(system.brokersAsString, advertised).joinToString(", "))
     },
     stop = { embeddedKafka.destroy() },
     running = { System.getProperty(EmbeddedKafkaBroker.SPRING_EMBEDDED_KAFKA_BROKERS) != null }
@@ -36,9 +49,8 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
         advertisedHost: String? = null,
         defaultPort: Int = DEFAULT_KAFKA_PORT
     ) : this(
-        EmbeddedKafkaZKBroker(
+        EmbeddedKafkaKraftBroker(
             NUMBER_OF_BROKERS,
-            CONTROLLED_SHUTDOWN,
             NUMBER_OF_PARTITIONS,
             *topics
         ).brokerProperties(mapOf("group.initial.rebalance.delay.ms" to "0") + properties),
@@ -62,7 +74,6 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
         private const val DEFAULT_KAFKA_PORT = 9093
         private const val NUMBER_OF_BROKERS = 1
         private const val NUMBER_OF_PARTITIONS = 1
-        private const val CONTROLLED_SHUTDOWN = true
 
         private fun advertisedListener(host: String, port: Int) =
             Environment.findAvailableTcpPort().let {
