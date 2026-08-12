@@ -6,5 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':env-container')
-    api "org.testcontainers:db2:$testContainers_version"
+    api "org.testcontainers:testcontainers-db2:$testContainers_version"
 }

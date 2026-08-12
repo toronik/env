@@ -4,7 +4,6 @@ import io.github.adven27.env.container.parseImage
 import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.shaded.org.apache.commons.io.FileUtils
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 
@@ -18,6 +17,7 @@ open class SeleniumContainerSystem @JvmOverloads constructor(
     companion object {
         private const val PORT = 4444
         private const val STARTUP_TIMEOUT = 30L
+        private const val SHARED_MEMORY_BYTES = 2L * 1024 * 1024 * 1024
 
         @JvmField
         val DEFAULT_IMAGE = "selenium/standalone-chrome".parseImage()
@@ -42,7 +42,7 @@ open class SeleniumContainerSystem @JvmOverloads constructor(
         withEnv("START_XVFB", "true")
         withEnv("SE_NODE_OVERRIDE_MAX_SESSIONS", "true")
         withEnv("SE_NODE_MAX_SESSIONS", "2")
-        withSharedMemorySize(2 * FileUtils.ONE_GB)
+        withSharedMemorySize(SHARED_MEMORY_BYTES)
         super.start()
         config = Config(host, firstMappedPort)
         apply(afterStart)
