@@ -5,7 +5,7 @@ buildscript {
     ext.testContainers_version = '2.0.5'
     ext.wiremock_version = '3.13.0'
     ext.klogging_version = '7.0.0'
-    ext.libVersion = "6.0.0"
+    ext.libVersion = "6.1.0"
     ext.libGroup = 'io.github.toronik'
     repositories {
         mavenCentral()
