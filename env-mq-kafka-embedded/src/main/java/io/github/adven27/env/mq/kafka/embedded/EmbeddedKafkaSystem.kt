@@ -61,6 +61,18 @@ open class EmbeddedKafkaSystem @JvmOverloads constructor(
     @Suppress("SpreadOperator")
     constructor(vararg topics: String) : this(topics = arrayOf(*topics))
 
+    fun addTopics(vararg topics: String) {
+        embeddedKafka.addTopicsWithResults(*topics)
+            .filterValues { it != null }
+            .let { failures ->
+                require(failures.isEmpty()) {
+                    "Не удалось создать топики: " + failures.entries.joinToString { "${it.key}: ${it.value.message}" }
+                }
+            }
+    }
+
+    fun topics(): Set<String> = embeddedKafka.topics
+
     override fun toString() = "Embedded Kafka Broker"
 
     open class Config(val bootstrapServers: String = "PLAINTEXT://localhost:$DEFAULT_KAFKA_PORT") :

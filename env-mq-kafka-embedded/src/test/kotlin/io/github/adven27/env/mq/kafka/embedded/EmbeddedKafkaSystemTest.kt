@@ -41,6 +41,23 @@ class EmbeddedKafkaSystemTest {
     }
 
     @Test
+    fun topicsCanBeAddedToARunningEnvironment() {
+        val env = SomeEnvironment().apply { up() }
+        sut = env
+
+        env.kafka().addTopics("late-topic")
+
+        assertTrue(env.kafka().topics().contains("late-topic"))
+        Admin.create(
+            mapOf(
+                BOOTSTRAP_SERVERS_CONFIG to env.kafka().config.bootstrapServers,
+                REQUEST_TIMEOUT_MS_CONFIG to "8000",
+                DEFAULT_API_TIMEOUT_MS_CONFIG to "12000"
+            )
+        ).use { assertTrue(it.listTopics().names().get().contains("late-topic")) }
+    }
+
+    @Test
     fun fixedEnvironmentIsNotSupported() {
         val port = Environment.findAvailableTcpPort()
         val env = FixedEnvironment(port)
