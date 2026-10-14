@@ -43,35 +43,9 @@ open class RedisContainerSystem @JvmOverloads constructor(
 
     override fun running() = isRunning
 
-    fun <T> exec(f: (KredsClient) -> T) = client.use(f)
-
-    fun keys(pattern: String = "*", vararg types: String): Collection<String> = exec { cl ->
-        runBlocking {
-            cl.keys(pattern)
-                .let { keys -> if (types.isEmpty()) keys else keys.filter { cl.type(it) in types } }
-                .sorted()
-        }
-    }
+    override fun <T> exec(f: (KredsClient) -> T) = client.use(f)
 
     override fun clean(): String = exec { runBlocking { it.flushAll() } }
-
-    fun type(key: String): String = exec { runBlocking { it.type(key) } }
-    fun del(vararg keys: String) = exec { runBlocking { it.del(*keys) } }
-    fun exists(vararg keys: String) = exec { runBlocking { it.exists(*keys) } }
-    fun exists(key: String) = exec { runBlocking { it.exists(key) == 1L } }
-    fun getMap(key: String): Map<String, String> =
-        exec { runBlocking { it.hgetAll(key).chunked(2).associate { it[0] to it[1] } } }
-
-    fun setMap(key: String, field: String, value: String): Long = exec { runBlocking { it.hset(key, field to value) } }
-    fun setMap(key: String, map: Map<String, String>): Long =
-        exec { cl -> runBlocking { map.toList().let { cl.hset(key, it.first(), *it.drop(1).toTypedArray()) } } }
-
-    fun getList(key: String, start: Int = 0, stop: Int = -1) = exec { runBlocking { it.lrange(key, start, stop) } }
-    fun setList(key: String, vararg values: String) =
-        exec { runBlocking { it.rpush(key, values.first(), *values.drop(1).toTypedArray()) } }
-
-    fun get(key: String): String? = exec { runBlocking { it.get(key) } }
-    fun set(key: String, value: String): String? = exec { runBlocking { it.set(key, value) } }
 
     data class Config @JvmOverloads constructor(val host: String = "localhost", val port: Int = PORT) :
         ExternalSystemConfig("env.redis.host" to host, "env.redis.port" to port.toString())
