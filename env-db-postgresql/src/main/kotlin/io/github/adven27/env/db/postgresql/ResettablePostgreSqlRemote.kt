@@ -6,9 +6,16 @@ import io.github.adven27.env.core.shouldReset
 import java.sql.DriverManager
 
 @Suppress("unused")
-fun resettablePostgres(props: Map<String, String>): ExternalSystem = ResettablePostgreSqlRemote(props)
+@JvmName("resettablePostgresSystem")
+fun resettablePostgres(props: Map<String, String>): PostgreSqlSystem = ResettablePostgreSqlRemote(props)
 
-private class ResettablePostgreSqlRemote(private val props: Map<String, String>) : ExternalSystem {
+/** Keeps the 6.1.1 JVM signature for binaries compiled against it. */
+@Suppress("unused")
+@Deprecated("Binary compatibility only", level = DeprecationLevel.HIDDEN)
+@JvmName("resettablePostgres")
+fun resettablePostgresCompat(props: Map<String, String>): ExternalSystem = ResettablePostgreSqlRemote(props)
+
+private class ResettablePostgreSqlRemote(private val props: Map<String, String>) : PostgreSqlSystem {
     override val config: ExternalSystemConfig = ExternalSystemConfig(props)
 
     override fun start(fixedEnv: Boolean) {

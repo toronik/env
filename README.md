@@ -98,6 +98,29 @@ class MyTestClass {
 }
 ```
 
+### Container or an already running stack (`ENV_REMOTE`)
+
+`postgres()` and `redis()` build a container system by default and a system on an already running server
+(e.g. sidecars of a shared dev environment, where there is no Docker) when `ENV_REMOTE=true`
+(system property or environment variable):
+
+```kotlin
+class SomeEnvironment : Environment(
+    "DB" to postgres(parse("postgres:15.5-alpine")),
+    "REDIS" to redis(parse("redis:6.2.6-alpine")),
+) {
+    fun database() = env<PostgreSqlSystem>().jdbc()
+    fun redis() = env<RedisSystem>()
+}
+```
+
+| Toggle | `postgres()` | `redis()` |
+|---|---|---|
+| unset | `PostgreSqlContainerSystem(image)` | `RedisContainerSystem(image)` |
+| `ENV_REMOTE=true` | database `TEST_DB_URL` (+ `dbSuffix`), dropped and created again on start; `TEST_DB_USER`/`TEST_DB_PASSWORD` (default `test`) | logical database `TEST_REDIS_DB` (default 0) of `TEST_REDIS_HOST`:`TEST_REDIS_PORT` (default `redis:6379`), flushed on start; sets `spring.data.redis.database` |
+
+A reset on start is skipped with `-DSPECS_SUT_START=false`. Use `envRemoteOn()` to skip a test that needs its own container.
+
 ### Run as standalone process
 
 Environment class implementation could be run as standalone java application with `io.github.adven27.env.core.EnvStarter`
