@@ -1,7 +1,6 @@
 package io.github.adven27.env.db.postgresql
 
 import io.github.adven27.env.container.parseImage
-import io.github.adven27.env.core.ExternalSystem
 import io.github.adven27.env.core.ExternalSystemConfig
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
@@ -11,7 +10,7 @@ open class PostgreSqlContainerSystem @JvmOverloads constructor(
     dockerImageName: DockerImageName = DEFAULT_IMAGE,
     private val defaultPort: Int = POSTGRESQL_PORT,
     private val afterStart: PostgreSqlContainerSystem.() -> Unit = { }
-) : PostgreSQLContainer<Nothing>(dockerImageName), ExternalSystem {
+) : PostgreSQLContainer<Nothing>(dockerImageName), PostgreSqlSystem {
     override lateinit var config: Config
 
     @JvmOverloads

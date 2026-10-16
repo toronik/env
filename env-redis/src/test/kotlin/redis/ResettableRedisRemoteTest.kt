@@ -21,8 +21,8 @@ import java.util.UUID
  * Runs against a Testcontainers Redis by default.
  * With `ENV_REMOTE=true` runs against an already running Redis (`TEST_REDIS_HOST`/`TEST_REDIS_PORT`,
  * default `redis:6379`) in the logical database `TEST_REDIS_DB` — the way a shared test stack provides it.
- * The "other" database (0) is then shared, so the test only writes there a uniquely named guard key
- * and removes it afterwards.
+ * The "other" database (0, or 1 when `TEST_REDIS_DB=0`) is then shared, so the test only writes there
+ * a uniquely named guard key and removes it afterwards.
  */
 @Suppress("TooManyFunctions")
 class ResettableRedisRemoteTest {
@@ -38,6 +38,7 @@ class ResettableRedisRemoteTest {
     private val host get() = redis?.host ?: System.getenv("TEST_REDIS_HOST") ?: "redis"
     private val port get() = redis?.firstMappedPort ?: System.getenv("TEST_REDIS_PORT")?.toInt() ?: 6379
     private val targetDb = if (remote) System.getenv("TEST_REDIS_DB")?.toInt() ?: TARGET_DB else TARGET_DB
+    private val otherDb = if (targetDb == OTHER_DB) TARGET_DB_NEIGHBOUR else OTHER_DB
     private val guardKey = "env_test_guard_${UUID.randomUUID()}"
 
     private val props get() = mapOf(
@@ -52,7 +53,7 @@ class ResettableRedisRemoteTest {
 
         // Seed db 0 with a key that must survive
         raw {
-            select(OTHER_DB.toULong())
+            select(otherDb.toULong())
             set(guardKey, "should_survive")
             select(targetDb.toULong())
             set("existing_key", "should_be_flushed")
@@ -64,7 +65,7 @@ class ResettableRedisRemoteTest {
         System.clearProperty("SPECS_SUT_START")
         System.clearProperty("TEST_NS_OWNER")
         raw {
-            select(OTHER_DB.toULong())
+            select(otherDb.toULong())
             del(guardKey)
             select(targetDb.toULong())
             flushDb()
@@ -82,7 +83,7 @@ class ResettableRedisRemoteTest {
 
         raw {
             // db 0 should still have the guard key
-            select(OTHER_DB.toULong())
+            select(otherDb.toULong())
             assertEquals("should_survive", get(guardKey))
 
             // target db should be empty except for __ns_owner__
@@ -116,7 +117,7 @@ class ResettableRedisRemoteTest {
 
         // Seed: add keys to both the target DB and db 0 after start
         raw {
-            select(OTHER_DB.toULong())
+            select(otherDb.toULong())
             set(guardKey, "must_survive")
             select(targetDb.toULong())
             set("target_key", "will_be_cleaned")
@@ -126,7 +127,7 @@ class ResettableRedisRemoteTest {
 
         raw {
             // db 0 must be untouched
-            select(OTHER_DB.toULong())
+            select(otherDb.toULong())
             assertEquals("db 0 must survive clean()", "must_survive", get(guardKey))
 
             // target DB must be empty (clean flushes its db only)
@@ -160,21 +161,21 @@ class ResettableRedisRemoteTest {
             assertEquals(listOf("a", "1"), hgetAll("map"))
             assertEquals(listOf("1"), lrange("list", 0, -1))
 
-            select(OTHER_DB.toULong())
+            select(otherDb.toULong())
             assertNull(get("k"))
             assertEquals(0L, exists("map", "list"))
             assertEquals("should_survive", get(guardKey))
         }
 
         raw {
-            select(OTHER_DB.toULong())
+            select(otherDb.toULong())
             set("other_db_only", "x")
         }
         try {
             assertNull("helpers must not read db 0", system.get("other_db_only"))
         } finally {
             raw {
-                select(OTHER_DB.toULong())
+                select(otherDb.toULong())
                 del("other_db_only")
             }
         }
@@ -267,5 +268,6 @@ class ResettableRedisRemoteTest {
     companion object {
         private const val TARGET_DB = 5
         private const val OTHER_DB = 0
+        private const val TARGET_DB_NEIGHBOUR = 1
     }
 }
